@@ -91,7 +91,6 @@ RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master
 
 # Install database CLI tools
 RUN npm install -g \
-    @databases/cli \
     prisma \
     typeorm \
     sequelize-cli \
