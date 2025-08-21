@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y \
     openssh-server \
     sudo \
     curl \
-    jq \
     git \
     vim \
     neovim \
@@ -16,10 +15,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     nodejs \
     npm \
-    htop \
-    tree \
     tmux \
-    fzf \
     zsh \
     net-tools \
     iputils-ping \
@@ -50,8 +46,36 @@ RUN curl -fsSL https://claude.ai/install | bash
 # Install essential development tools
 # (Node.js and Python tools will be installed per-project as needed)
 
-# Install essential CLI tools
-# (Rust-based tools will be installed per-project as needed)
+# Install essential lightweight CLI tools
+RUN apt-get update && apt-get install -y \
+    jq \
+    yq \
+    xmlstarlet \
+    ripgrep \
+    fd-find \
+    bat \
+    exa \
+    fzf \
+    tree \
+    htop \
+    ncdu \
+    tldr \
+    && apt-get clean
+
+# Install additional useful tools
+RUN npm install -g \
+    yaml \
+    xml2js \
+    csv-parser \
+    json \
+    && npm cache clean --force
+
+# Install additional lightweight system tools
+RUN apt-get update && apt-get install -y \
+    moreutils \
+    parallel \
+    expect \
+    && apt-get clean
 
 # Install Oh My Zsh
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
