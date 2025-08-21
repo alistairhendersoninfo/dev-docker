@@ -111,9 +111,9 @@ RUN mkdir -p /home/developer/.ssh && \
     chown developer:developer /home/developer/.ssh && \
     chmod 700 /home/developer/.ssh
 
-# Copy SSH public key (will be mounted at runtime)
-COPY id_rsa.pub /home/developer/.ssh/authorized_keys
-RUN chown developer:developer /home/developer/.ssh/authorized_keys && \
+# Create authorized_keys file (will be populated at runtime via volume mount)
+RUN touch /home/developer/.ssh/authorized_keys && \
+    chown developer:developer /home/developer/.ssh/authorized_keys && \
     chmod 600 /home/developer/.ssh/authorized_keys
 
 # Configure SSH
