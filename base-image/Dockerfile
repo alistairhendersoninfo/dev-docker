@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean
 
 # Install Cursor CLI
-RUN curl -L https://cursor.sh/install.sh | sh
+RUN curl -L https://cursor.sh/install.sh | bash
 
 # Install OpenCode CLI
 RUN npm install -g @opencode/cli
