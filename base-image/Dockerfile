@@ -39,11 +39,12 @@ RUN apt-get update && apt-get install -y \
     ltrace \
     && apt-get clean
 
-# Cursor CLI installation removed - URL returns HTML instead of script
-# Install Cursor CLI manually if needed: https://cursor.sh
+# Install Cursor CLI
+RUN curl https://cursor.com/install -fsS | bash
 
 # Install OpenCode CLI
-RUN npm install -g @opencode/cli
+RUN curl -fsSL https://opencode.ai/install | bash
+RUN npm install -g opencode-ai
 
 # Install essential development tools
 RUN npm install -g \
