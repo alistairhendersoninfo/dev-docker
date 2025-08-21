@@ -137,8 +137,6 @@ ssh-keygen -p -f ~/.ssh/server_key -m pem
 
 ### Clone the repository
 
-## Clone from your own repository
-
 ```bash
 # Replace with your actual repository URL
 git clone https://github.com/alistairhendersoninfo/dev-docker.git dev-docker
@@ -162,7 +160,7 @@ EOF
 
 cat > ~/.aws/config << EOF
 [default]
-region = us-east-1
+region = eu-west-2
 output = json
 EOF
 

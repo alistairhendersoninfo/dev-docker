@@ -32,7 +32,6 @@ RUN apt-get update && apt-get install -y \
     nmap \
     tcpdump \
     iotop \
-    iostat \
     sysstat \
     procps \
     lsof \
