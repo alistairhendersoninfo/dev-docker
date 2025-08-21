@@ -14,8 +14,6 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     wget \
     unzip \
-    python3 \
-    python3-pip \
     nodejs \
     npm \
     htop \
@@ -46,61 +44,20 @@ RUN curl https://cursor.com/install -fsS | bash
 RUN curl -fsSL https://opencode.ai/install | bash
 RUN npm install -g opencode-ai
 
+# Install Claude CLI
+RUN curl -fsSL https://claude.ai/install | bash
+
 # Install essential development tools
-RUN npm install -g \
-    typescript \
-    ts-node \
-    @types/node \
-    eslint \
-    prettier \
-    nodemon
+# (Node.js and Python tools will be installed per-project as needed)
 
-# Install Python development tools
-RUN pip3 install \
-    black \
-    flake8 \
-    mypy \
-    pytest \
-    yq \
-    xmltodict
-
-# Install Rust (for modern CLI tools)
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-# Install essential Rust-based CLI tools
-RUN cargo install \
-    bat \
-    exa \
-    fd-find \
-    ripgrep \
-    tokei \
-    starship \
-    zoxide \
-    bottom \
-    du-dust \
-    procs \
-    sd \
-    tealdeer \
-    xh \
-    oha \
-    bandwhich
+# Install essential CLI tools
+# (Rust-based tools will be installed per-project as needed)
 
 # Install Oh My Zsh
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
-# Install database CLI tools
-RUN npm install -g \
-    prisma \
-    typeorm \
-    sequelize-cli \
-    knex \
-    mongosh
-
-# Install database GUI alternatives
-RUN npm install -g \
-    @dbgate/cli \
-    @dbgate/desktop
+# Install database tools
+# (Database CLI tools will be installed per-project as needed)
 
 # Create developer user and sudo group
 RUN groupadd -r sudo && \
