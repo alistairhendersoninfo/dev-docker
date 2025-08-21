@@ -22,9 +22,25 @@
         }
       },
       "versions": {
-        "latest": "20.x",
-        "lts": "18.x",
-        "current": "21.x"
+        "latest": "21.x",
+        "lts": "20.x",
+        "current": "21.x",
+        "21": "21.0.0",
+        "20": "20.10.0",
+        "19": "19.9.0",
+        "18": "18.19.0",
+        "17": "17.9.1",
+        "16": "16.20.2",
+        "15": "15.14.0",
+        "14": "14.21.3",
+        "13": "13.14.0",
+        "12": "12.22.12",
+        "11": "11.15.0",
+        "10": "10.24.1",
+        "9": "9.11.2",
+        "8": "8.17.0",
+        "7": "7.10.1",
+        "6": "6.17.1"
       },
       "post_install": [
         "npm install -g npm@latest",
@@ -38,6 +54,12 @@
         "ubuntu": {
           "apt": {
             "packages": ["python3", "python3-pip", "python3-venv", "python3-dev", "build-essential"]
+          },
+          "manual": {
+            "script": "curl -fsSL https://www.python.org/ftp/python/{version}/Python-{version}.tgz | tar -xzf -",
+            "env_vars": {
+              "PATH": "/usr/local/python{version}/bin:$PATH"
+            }
           }
         },
         "alpine": {
@@ -49,7 +71,17 @@
       "versions": {
         "latest": "3.12",
         "stable": "3.11",
-        "legacy": "3.10"
+        "legacy": "3.10",
+        "3.9": "3.9.18",
+        "3.8": "3.8.18",
+        "3.7": "3.7.17",
+        "3.6": "3.6.15",
+        "3.5": "3.5.10",
+        "3.4": "3.4.10",
+        "3.3": "3.3.7",
+        "3.2": "3.2.6",
+        "3.1": "3.1.5",
+        "3.0": "3.0.1"
       },
       "post_install": [
         "pip3 install --upgrade pip",
@@ -98,9 +130,22 @@
         }
       },
       "versions": {
-        "latest": "1.21.5",
+        "latest": "1.22.0",
         "stable": "1.21.5",
-        "beta": "1.22.0"
+        "beta": "1.22.0",
+        "1.22": "1.22.0",
+        "1.21": "1.21.5",
+        "1.20": "1.20.12",
+        "1.19": "1.19.13",
+        "1.18": "1.18.10",
+        "1.17": "1.17.13",
+        "1.16": "1.16.15",
+        "1.15": "1.15.15",
+        "1.14": "1.14.15",
+        "1.13": "1.13.15",
+        "1.12": "1.12.17",
+        "1.11": "1.11.13",
+        "1.10": "1.10.8"
       }
     },
     "java": {
@@ -120,9 +165,23 @@
         }
       },
       "versions": {
-        "latest": "17",
+        "latest": "21",
         "lts": "17",
-        "legacy": "11"
+        "legacy": "11",
+        "21": "21.0.1",
+        "20": "20.0.2",
+        "19": "19.0.2",
+        "18": "18.0.2",
+        "17": "17.0.8",
+        "16": "16.0.2",
+        "15": "15.0.2",
+        "14": "14.0.2",
+        "13": "13.0.2",
+        "12": "12.0.2",
+        "11": "11.0.20",
+        "10": "10.0.2",
+        "9": "9.0.4",
+        "8": "1.8.0_392"
       }
     },
     "dotnet": {
@@ -154,19 +213,36 @@
       "install_methods": {
         "ubuntu": {
           "apt": {
-            "packages": ["php8.1", "php8.1-cli", "php8.1-fpm", "php8.1-mysql", "php8.1-xml", "php8.1-curl", "php8.1-mbstring", "php8.1-zip", "composer"]
+            "packages": ["php{version}", "php{version}-cli", "php{version}-fpm", "php{version}-mysql", "php{version}-xml", "php{version}-curl", "php{version}-mbstring", "php{version}-zip", "composer"],
+            "repository": "deb https://ppa.launchpadcontent.net/ondrej/php/ubuntu $(lsb_release -cs) main",
+            "key": "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x4F4EA0AAE5267A6C"
+          },
+          "manual": {
+            "script": "curl -fsSL https://www.php.net/distributions/php-{version}.tar.gz | tar -xzf -",
+            "env_vars": {
+              "PATH": "/usr/local/php{version}/bin:$PATH"
+            }
           }
         },
         "alpine": {
           "apk": {
-            "packages": ["php81", "php81-cli", "php81-fpm", "php81-mysqli", "php81-xml", "php81-curl", "php81-mbstring", "php81-zip", "composer"]
+            "packages": ["php{version}", "php{version}-cli", "php{version}-fpm", "php{version}-mysqli", "php{version}-xml", "php{version}-curl", "php{version}-mbstring", "php{version}-zip", "composer"]
           }
         }
       },
       "versions": {
-        "latest": "8.1",
-        "stable": "8.1",
-        "legacy": "7.4"
+        "latest": "8.3",
+        "stable": "8.2",
+        "legacy": "8.1",
+        "8.3": "8.3.0",
+        "8.2": "8.2.0",
+        "8.1": "8.1.0",
+        "8.0": "8.0.0",
+        "7.4": "7.4.0",
+        "7.3": "7.3.0",
+        "7.2": "7.2.0",
+        "7.1": "7.1.0",
+        "7.0": "7.0.0"
       }
     },
     "ruby": {
@@ -198,21 +274,34 @@
       "install_methods": {
         "ubuntu": {
           "apt": {
-            "packages": ["postgresql", "postgresql-contrib", "postgresql-client"],
+            "packages": ["postgresql-{version}", "postgresql-{version}-contrib", "postgresql-client"],
             "repository": "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main",
             "key": "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
+          },
+          "manual": {
+            "script": "curl -fsSL https://www.postgresql.org/ftp/source/v{version}/postgresql-{version}.tar.gz | tar -xzf -",
+            "env_vars": {
+              "PATH": "/usr/local/pgsql{version}/bin:$PATH"
+            }
           }
         },
         "alpine": {
           "apk": {
-            "packages": ["postgresql", "postgresql-contrib", "postgresql-client"]
+            "packages": ["postgresql{version}", "postgresql{version}-contrib", "postgresql-client"]
           }
         }
       },
       "versions": {
-        "latest": "15",
+        "latest": "16",
         "stable": "15",
-        "lts": "14"
+        "lts": "14",
+        "16": "16.0",
+        "15": "15.4",
+        "14": "14.11",
+        "13": "13.14",
+        "12": "12.18",
+        "11": "11.23",
+        "10": "10.23"
       },
       "default_port": 5432,
       "config_files": ["/etc/postgresql/*/main/postgresql.conf", "/etc/postgresql/*/main/pg_hba.conf"]
@@ -223,21 +312,30 @@
       "install_methods": {
         "ubuntu": {
           "apt": {
-            "packages": ["mysql-server", "mysql-client"],
-            "repository": "deb http://repo.mysql.com/apt/ubuntu $(lsb_release -cs) mysql-8.0",
+            "packages": ["mysql-server-{version}", "mysql-client"],
+            "repository": "deb http://repo.mysql.com/apt/ubuntu $(lsb_release -cs) mysql-{version}",
             "key": "https://repo.mysql.com/RPM-GPG-KEY-mysql-2022"
+          },
+          "manual": {
+            "script": "curl -fsSL https://dev.mysql.com/get/Downloads/MySQL-{version}/mysql-{version}-linux-glibc2.12-x86_64.tar.gz | tar -xzf -",
+            "env_vars": {
+              "PATH": "/usr/local/mysql{version}/bin:$PATH"
+            }
           }
         },
         "alpine": {
           "apk": {
-            "packages": ["mysql", "mysql-client"]
+            "packages": ["mysql{version}", "mysql-client"]
           }
         }
       },
       "versions": {
         "latest": "8.0",
         "stable": "8.0",
-        "lts": "5.7"
+        "lts": "5.7",
+        "8.0": "8.0.35",
+        "5.7": "5.7.44",
+        "5.6": "5.6.51"
       },
       "default_port": 3306,
       "config_files": ["/etc/mysql/mysql.conf.d/mysqld.cnf"]
@@ -690,6 +788,56 @@
       }
     }
   },
+  "legacy_tools": {
+    "phpbrew": {
+      "name": "PHPBrew",
+      "description": "PHP version manager for multiple PHP versions",
+      "install_methods": {
+        "universal": {
+          "script": "curl -L -O https://github.com/phpbrew/phpbrew/releases/latest/download/phpbrew.phar && chmod +x phpbrew.phar && sudo mv phpbrew.phar /usr/local/bin/phpbrew"
+        }
+      },
+      "versions": {
+        "latest": "1.27.0"
+      }
+    },
+    "pyenv": {
+      "name": "pyenv",
+      "description": "Python version manager for multiple Python versions",
+      "install_methods": {
+        "universal": {
+          "script": "curl https://pyenv.run | bash"
+        }
+      },
+      "versions": {
+        "latest": "2.3.25"
+      }
+    },
+    "nvm": {
+      "name": "Node Version Manager",
+      "description": "Node.js version manager for multiple Node.js versions",
+      "install_methods": {
+        "universal": {
+          "script": "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash"
+        }
+      },
+      "versions": {
+        "latest": "0.39.0"
+      }
+    },
+    "rbenv": {
+      "name": "rbenv",
+      "description": "Ruby version manager for multiple Ruby versions",
+      "install_methods": {
+        "universal": {
+          "script": "curl -fsSL https://github.com/rbenv/rbenv-installer/raw/main/bin/rbenv-installer | bash"
+        }
+      },
+      "versions": {
+        "latest": "1.2.0"
+      }
+    }
+  },
   "package_managers": {
     "npm": {
       "name": "Node Package Manager",
@@ -734,12 +882,64 @@
       }
     }
   },
+  "version_management": {
+    "php": {
+      "description": "PHP version switching",
+      "tools": ["phpbrew", "phpenv", "update-alternatives"],
+      "recommended": "phpbrew for multiple PHP versions"
+    },
+    "python": {
+      "description": "Python version switching",
+      "tools": ["pyenv", "conda", "update-alternatives"],
+      "recommended": "pyenv for multiple Python versions"
+    },
+    "nodejs": {
+      "description": "Node.js version switching",
+      "tools": ["nvm", "n", "fnm"],
+      "recommended": "nvm for multiple Node.js versions"
+    },
+    "postgresql": {
+      "description": "PostgreSQL version switching",
+      "tools": ["pg_switch", "update-alternatives"],
+      "recommended": "pg_switch for multiple PostgreSQL versions"
+    },
+    "mysql": {
+      "description": "MySQL version switching",
+      "tools": ["mysql_switch", "update-alternatives"],
+      "recommended": "mysql_switch for multiple MySQL versions"
+    }
+  },
+  "legacy_support": {
+    "description": "Tools and configurations for legacy code support",
+    "php_legacy": {
+      "7.0": "Requires specific extensions and configurations",
+      "7.1": "Improved performance over 7.0",
+      "7.2": "Better type hints and performance",
+      "7.3": "Flexible heredoc syntax",
+      "7.4": "Typed properties and arrow functions"
+    },
+    "python_legacy": {
+      "3.6": "f-strings and type annotations",
+      "3.7": "Data classes and postponed evaluation",
+      "3.8": "Assignment expressions and positional-only args",
+      "3.9": "Generic types and dict union operators",
+      "3.10": "Pattern matching and union types"
+    },
+    "postgresql_legacy": {
+      "10": "Logical replication and declarative partitioning",
+      "11": "Improved partitioning and parallel query",
+      "12": "Generated columns and improved performance",
+      "13": "Incremental sort and parallel vacuum",
+      "14": "Logical replication improvements"
+    }
+  },
   "metadata": {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "last_updated": "2024-08-21",
     "maintainer": "Project Container Creator",
-    "description": "Software installation configuration for development containers",
+    "description": "Software installation configuration for development containers with legacy version support",
     "supported_platforms": ["ubuntu", "alpine", "debian", "centos"],
-    "update_frequency": "monthly"
+    "update_frequency": "monthly",
+    "legacy_support": "PHP 7.0+, Python 3.0+, PostgreSQL 10+, MySQL 5.6+"
   }
 }
