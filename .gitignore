@@ -199,3 +199,8 @@ temp/
 # Local development
 .local/
 local/
+
+# Development tracking (exclude from public repos)
+TODO.md
+*.todo
+roadmap.md
