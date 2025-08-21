@@ -88,8 +88,8 @@ get_next_available_ip() {
     
     # Read existing IPs from docker-compose
     local used_ips=()
-    if [ -f "docker-compose.yml" ]; then
-        used_ips=($(grep -o "ipv4_address: $base_ip\.[0-9]*" docker-compose.yml | cut -d: -f2 | tr -d ' '))
+    if [ -f "docker/docker-compose.yml" ]; then
+    used_ips=($(grep -o "ipv4_address: $base_ip\.[0-9]*" docker/docker-compose.yml | cut -d: -f2 | tr -d ' '))
     fi
     
     # Find next available IP
@@ -169,7 +169,7 @@ add_service_to_compose() {
     local service_config=$2
     
     # Find the last service in docker-compose.yml
-    local last_service_line=$(grep -n "^  [a-zA-Z]" docker-compose.yml | tail -1 | cut -d: -f1)
+    local last_service_line=$(grep -n "^  [a-zA-Z]" docker/docker-compose.yml | tail -1 | cut -d: -f1)
     
     if [ -z "$last_service_line" ]; then
         print_error "Could not find services in docker-compose.yml"
@@ -183,7 +183,7 @@ add_service_to_compose() {
     local temp_file=$(mktemp)
     
     # Copy content up to insert point
-    head -n $insert_line docker-compose.yml > "$temp_file"
+    head -n $insert_line docker/docker-compose.yml > "$temp_file"
     
     # Add new service
     echo "$service_config" >> "$temp_file"
@@ -192,10 +192,10 @@ add_service_to_compose() {
     echo "" >> "$temp_file"
     
     # Copy remaining content
-    tail -n +$insert_line docker-compose.yml >> "$temp_file"
+    tail -n +$insert_line docker/docker-compose.yml >> "$temp_file"
     
     # Replace original file
-    mv "$temp_file" docker-compose.yml
+    mv "$temp_file" docker/docker-compose.yml
     
     print_status "Added service '$project_name' to docker-compose.yml"
 }
@@ -243,8 +243,8 @@ validate_service_type() {
 
 # Function to check prerequisites
 check_prerequisites() {
-    if [ ! -f "docker-compose.yml" ]; then
-        print_error "docker-compose.yml not found in current directory"
+    if [ ! -f "docker/docker-compose.yml" ]; then
+        print_error "docker/docker-compose.yml not found in current directory"
         exit 1
     fi
     

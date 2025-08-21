@@ -5,12 +5,14 @@ A powerful bash script for automatically creating and managing multiple Docker p
 ## 🚀 Features
 
 ### **Automatic Resource Management**
+
 - ✅ **Port Allocation**: Automatically finds next available external ports
 - ✅ **IP Assignment**: Dynamically assigns IP addresses in your network range
 - ✅ **Conflict Detection**: Prevents port and IP conflicts
 - ✅ **Service Dependencies**: Automatically configures service dependencies
 
 ### **Service Type Support**
+
 - 🌐 **Web Services**: HTTP/HTTPS with automatic Traefik configuration
 - 🔌 **API Services**: Backend services with custom port support
 - 🗄️ **Database Services**: Database containers with proper port mapping
@@ -18,6 +20,7 @@ A powerful bash script for automatically creating and managing multiple Docker p
 - 🔑 **SSH Services**: SSH-only containers for development access
 
 ### **Smart Configuration**
+
 - 🔧 **Docker Compose Integration**: Automatically adds services to compose file
 - 🌐 **Traefik Labels**: Web services get automatic HTTPS with Let's Encrypt
 - 🌍 **Network Setup**: Proper IP assignment and DNS configuration
@@ -50,11 +53,13 @@ A powerful bash script for automatically creating and managing multiple Docker p
 ## 📖 Usage
 
 ### **Basic Syntax**
+
 ```bash
 ./create-project.sh <project_name> <service_type> [custom_ports] [domain]
 ```
 
 ### **Parameters**
+
 - **`project_name`**: Name of your project/container (required)
 - **`service_type`**: Type of service (web, api, database, redis, ssh)
 - **`custom_ports`**: Custom port mappings (optional, format: internal:external,internal:external)
@@ -62,7 +67,9 @@ A powerful bash script for automatically creating and managing multiple Docker p
 
 ### **Examples**
 
+
 #### **Create a Simple Web Project**
+
 ```bash
 ./create-project.sh mywebsite web
 ```
@@ -71,6 +78,7 @@ A powerful bash script for automatically creating and managing multiple Docker p
 - Assigns next available IP address
 
 #### **Create an API Service**
+
 ```bash
 ./create-project.sh myapi api 3000:3000
 ```
@@ -79,6 +87,7 @@ A powerful bash script for automatically creating and managing multiple Docker p
 - Uses default API configuration
 
 #### **Create a Web Project with Custom Ports and Domain**
+
 ```bash
 ./create-project.sh myapp web 80:8080,443:8443 myapp.local
 ```
@@ -87,6 +96,7 @@ A powerful bash script for automatically creating and managing multiple Docker p
 - Sets up HTTPS with Let's Encrypt
 
 #### **Create a Database Service**
+
 ```bash
 ./create-project.sh mydb database 5432:5432
 ```
@@ -95,6 +105,7 @@ A powerful bash script for automatically creating and managing multiple Docker p
 - No Traefik configuration (internal service)
 
 #### **Create an SSH-Only Container**
+
 ```bash
 ./create-project.sh myssh ssh 22:2225
 ```
@@ -105,6 +116,7 @@ A powerful bash script for automatically creating and managing multiple Docker p
 ## 🔧 Configuration
 
 ### **Default Port Mappings**
+
 ```bash
 web:      80:80, 443:443
 api:      3000:3000
@@ -114,12 +126,14 @@ ssh:      22:22
 ```
 
 ### **Network Configuration**
+
 - **Network Name**: `devnet`
 - **IP Range**: `172.20.0.20` to `172.20.0.254`
 - **DNS**: `172.20.0.2` (dnsmasq service)
 - **Base Image**: `dev-base:latest`
 
 ### **Traefik Integration**
+
 Web and API services automatically get:
 - HTTPS with Let's Encrypt certificates
 - Automatic domain routing
@@ -143,21 +157,25 @@ dev-docker/
 ## 🚀 Workflow
 
 ### **1. Create New Project**
+
 ```bash
 ./create-project.sh myproject web
 ```
 
 ### **2. Start the Service**
+
 ```bash
 docker-compose up myproject
 ```
 
 ### **3. Access Your Service**
+
 - **Web**: https://myproject.local (if domain configured)
 - **SSH**: `ssh -p <port> developer@localhost`
 - **Direct Port**: http://localhost:<external_port>
 
 ### **4. Manage Services**
+
 ```bash
 # View logs
 docker-compose logs myproject
@@ -176,25 +194,30 @@ docker-compose rm myproject
 
 ### **Common Issues**
 
+
 #### **Port Already in Use**
+
 ```bash
 Error: Port 8080 is already in use
 ```
 **Solution**: The script automatically finds the next available port
 
 #### **IP Address Conflict**
+
 ```bash
 Error: No available IP addresses in range
 ```
 **Solution**: Check your docker-compose.yml for unused IPs or extend the range
 
 #### **Service Creation Fails**
+
 ```bash
 Error: Could not find services in docker-compose.yml
 ```
 **Solution**: Ensure docker-compose.yml exists and has at least one service
 
 ### **Debug Mode**
+
 Add `set -x` at the top of the script for verbose output:
 ```bash
 #!/bin/bash
@@ -204,15 +227,18 @@ set -x  # Add this line for debugging
 ## 🎯 Best Practices
 
 ### **Naming Conventions**
+
 - ✅ **Good**: `client-website`, `api-backend`, `dev-database`
 - ❌ **Bad**: `web1`, `test`, `new`
 
 ### **Port Management**
+
 - Use default ports when possible
 - Custom ports are useful for development/testing
 - Avoid common ports (22, 80, 443, 3306, 5432)
 
 ### **Service Organization**
+
 - Group related services together
 - Use descriptive names for easy identification
 - Document custom configurations
@@ -220,6 +246,7 @@ set -x  # Add this line for debugging
 ## 🔮 Future Enhancements
 
 ### **Planned Features**
+
 - [ ] **Software Selection Menu**: Interactive menu for choosing development tools
 - [ ] **Volume Management**: Automatic volume creation and mounting
 - [ ] **Environment Variables**: Template-based environment configuration
@@ -228,6 +255,7 @@ set -x  # Add this line for debugging
 - [ ] **Scaling**: Automatic service scaling based on load
 
 ### **Software Packages Menu**
+
 The script will include an interactive menu for selecting:
 - **Development Tools**: Git, Vim, VS Code, etc.
 - **Programming Languages**: Node.js, Python, Rust, Go, etc.
@@ -238,6 +266,7 @@ The script will include an interactive menu for selecting:
 ## 🤝 Contributing
 
 ### **How to Contribute**
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
@@ -245,6 +274,7 @@ The script will include an interactive menu for selecting:
 5. Submit a pull request
 
 ### **Development Setup**
+
 ```bash
 git clone https://github.com/yourusername/dev-docker.git
 cd dev-docker
@@ -266,11 +296,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 ### **Getting Help**
+
 - **Issues**: Create an issue on GitHub
 - **Discussions**: Use GitHub Discussions
 - **Documentation**: Check this README and examples
 
 ### **Community**
+
 - **GitHub**: [Project Repository](https://github.com/yourusername/dev-docker)
 - **Discussions**: [Community Forum](https://github.com/yourusername/dev-docker/discussions)
 - **Wiki**: [Project Wiki](https://github.com/yourusername/dev-docker/wiki)

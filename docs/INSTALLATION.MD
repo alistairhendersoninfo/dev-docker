@@ -179,13 +179,13 @@ sed -i 's/your-email@example.com/YOUR_EMAIL@example.com/' traefik/traefik.yml
 ### Build the base development image
 
 ```bash
-docker build -t dev-base:latest base-image
+docker build -t dev-base:latest docker/base-image
 ```
 
 ### Build the Playwright image
 
 ```bash
-docker build -t dev-playwright:latest playwright-image
+docker build -t dev-playwright:latest docker/playwright-image
 ```
 
 ## Step 6: Configure DNS
@@ -209,14 +209,14 @@ nslookup test-local.alistairhenderson.info
 ### Bring up all services
 
 ```bash
-docker compose up -d
+docker compose -f docker/docker-compose.yml up -d
 ```
 
 ### Check service status
 
 ```bash
-docker compose ps
-docker compose logs -f
+docker compose -f docker/docker-compose.yml ps
+docker compose -f docker/docker-compose.yml logs -f
 ```
 
 ## Step 8: Verify Installation
@@ -387,7 +387,7 @@ docker save dev-base:latest > dev-base.tar
 docker save dev-playwright:latest > dev-playwright.tar
 
 # Backup configuration
-tar -czf config-backup.tar.gz docker-compose.yml traefik/ dns/
+tar -czf config-backup.tar.gz docker/docker-compose.yml docker/traefik/ docker/dns/
 ```
 
 ## Support

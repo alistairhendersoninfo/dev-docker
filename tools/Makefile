@@ -1,14 +1,14 @@
 build:
-	docker compose build
+	docker compose -f docker/docker-compose.yml build
 
 up:
-	docker compose up -d
+	docker compose -f docker/docker-compose.yml up -d
 
 down:
-	docker compose down
+	docker compose -f docker/docker-compose.yml down
 
 logs:
-	docker compose logs -f
+	docker compose -f docker/docker-compose.yml logs -f
 
 ssh-base:
 	ssh developer@localhost -p 2220
@@ -24,8 +24,8 @@ ssh-playwright:
 
 # Build and push base images to registry
 build-base:
-	docker build -t dev-base:latest base-image
-	docker build -t dev-playwright:latest playwright-image
+	docker build -t dev-base:latest docker/base-image
+	docker build -t dev-playwright:latest docker/playwright-image
 
 # Push to GitHub Container Registry (free)
 push-ghcr:

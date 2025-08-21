@@ -2,60 +2,71 @@
 
 A production-ready development environment using Docker containers with automatic SSL certificates, DNS resolution, and SSH access.
 
-## Features
+## 📁 Project Structure
 
-- 🐳 **Base Development Image**: Ubuntu 22.04 with Git, Python, Node.js, Cursor CLI, OpenCode CLI, and development tools
-- 🎭 **Playwright Image**: Browser automation tools extending the base image
-- 🔒 **Automatic SSL**: Let's Encrypt certificates via Traefik with Route53 DNS challenge
-- 🌐 **Local DNS**: DNSmasq for `*.local.alistairhenderson.info` domains
-- 🔑 **SSH Access**: Key-based authentication to all development containers
-- 🚀 **Easy Scaling**: Add new projects with simple service definitions
+```
+dev-docker/
+├── docs/                    # Documentation and guides
+│   ├── README.md           # Main project documentation
+│   ├── INSTALLATION.MD     # Detailed setup instructions
+│   ├── DEV-TOOLS.md        # Development tools reference
+│   ├── TMUX-GUIDE.md       # Terminal multiplexer guide
+│   ├── ROADMAP.md          # Development roadmap
+│   ├── TODO.md             # Development tasks
+│   └── README-create-project.md # Project creation guide
+├── docker/                  # Docker configuration
+│   ├── docker-compose.yml  # Main service definitions
+│   ├── base-image/         # Base development environment
+│   ├── playwright-image/   # Browser automation tools
+│   ├── traefik/            # Reverse proxy configuration
+│   └── dns/                # DNS server configuration
+├── scripts/                 # Automation scripts
+│   ├── create-project.sh   # Project creation script
+│   ├── create-project-interactive.sh  # Interactive project creator
+│   ├── setup.sh            # Initial setup script
+│   └── examples.sh         # Usage examples
+├── templates/               # Template files
+│   └── project-template.yml # Docker service template
+├── tools/                   # Development tools
+│   ├── Makefile            # Common commands
+│   └── software-config.json # Software package configuration
+└── .gitignore              # Git ignore rules
+```
 
-## Quick Start
+## 🚀 Quick Start
 
 ### 1. Prerequisites
-
 - Ubuntu 22.04/24.04 server
 - Domain with AWS Route53 access
 - Ports 80, 443 open
 
 ### 2. Install Docker
-
 ```bash
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
+curl -fsSL https://get.docker.com -o scripts/get-docker.sh
+sudo sh scripts/get-docker.sh
 sudo usermod -aG docker $USER
 newgrp docker
 ```
 
 ### 3. Clone and Setup
-
 ```bash
 git clone https://github.com/alistairhendersoninfo/dev-docker.git dev-docker
 cd dev-docker
-./setup.sh
+./scripts/setup.sh
 ```
 
-### 4. Configure
-
-- Add AWS credentials to `~/.aws/credentials`
-- Update email in `traefik/traefik.yml`
-- Add DNS wildcard: `*.local.alistairhenderson.info` → your server IP
-
-### 5. Build and Run
-
+### 4. Build and Run
 ```bash
-make build-base
-docker compose up -d
+make -f tools/Makefile build-base
+docker compose -f docker/docker-compose.yml up -d
 ```
 
-### 6. Access
-
+### 5. Access
 ```bash
 # SSH to containers
-make ssh-project1
-make ssh-project2
-make ssh-playwright
+make -f tools/Makefile ssh-project1
+make -f tools/Makefile ssh-project2
+make -f tools/Makefile ssh-playwright
 
 # Visit in browser
 https://project1-local.alistairhenderson.info
@@ -63,172 +74,67 @@ https://project2-local.alistairhenderson.info
 https://playwright-local.alistairhenderson.info
 ```
 
-## Architecture
+## 📚 Documentation
 
-```
-Internet → Traefik (80/443) → Development Containers
-                ↓
-            DNSmasq (53)
-                ↓
-        *.local.alistairhenderson.info
-```
+- **[Main Documentation](docs/README.md)** - Complete project overview and setup
+- **[Installation Guide](docs/INSTALLATION.MD)** - Step-by-step setup instructions
+- **[Development Tools](docs/DEV-TOOLS.md)** - Available tools and packages
+- **[TMUX Guide](docs/TMUX-GUIDE.md)** - Terminal multiplexer usage
+- **[Project Roadmap](docs/ROADMAP.md)** - Development plans and progress
+- **[Project Creator Guide](docs/README-create-project.md)** - How to create new projects
 
-- **Traefik**: Reverse proxy with automatic SSL
-- **DNSmasq**: Local DNS resolution
-- **Base Image**: Ubuntu with development tools
-- **Playwright Image**: Browser automation tools
-- **Project Containers**: Individual development environments
+## 🛠️ Scripts
 
-## Adding New Projects
+- **[Project Creator](scripts/create-project-interactive.sh)** - Interactive project setup
+- **[Setup Script](scripts/setup.sh)** - Initial environment setup
+- **[Examples](scripts/examples.sh)** - Usage examples and patterns
 
-### Method 1: Copy Service Block
-
-```yaml
-myproject:
-  image: dev-base:latest
-  container_name: myproject
-  hostname: myproject.docker
-  labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.myproject.rule=Host(`myproject-local.alistairhenderson.info`)"
-    - "traefik.http.routers.myproject.entrypoints=websecure"
-    - "traefik.http.routers.myproject.tls=true"
-    - "traefik.http.routers.myproject.tls.certresolver=letsencrypt"
-  ports:
-    - "2224:22"
-  networks:
-    devnet:
-      ipv4_address: 172.20.0.13
-  dns:
-    - 172.20.0.2
-  depends_on:
-    - base-image
-```
-
-### Method 2: Use Template
-
-```bash
-# Copy template and update
-cp docker-compose.yml docker-compose.yml.backup
-# Edit docker-compose.yml to add new service
-docker compose up -d
-```
-
-## Base Image Hosting
-
-### Option A: GitHub Container Registry (Free)
-
-```bash
-make push-ghcr
-# Update docker-compose.yml to use ghcr.io/USERNAME/dev-base:latest
-```
-
-### Option B: Local Registry
-
-```bash
-make setup-local-registry
-make push-local
-# Update docker-compose.yml to use localhost:5000/dev-base:latest
-```
-
-## Commands
+## 🐳 Docker Commands
 
 ```bash
 # Basic operations
-make up          # Start all services
-make down        # Stop all services
-make logs        # View logs
-make build-base  # Build base images
+make -f tools/Makefile up          # Start all services
+make -f tools/Makefile down        # Stop all services
+make -f tools/Makefile logs        # View logs
+make -f tools/Makefile build-base  # Build base images
 
 # SSH access
-make ssh-project1    # SSH to project1
-make ssh-project2    # SSH to project2
-make ssh-playwright  # SSH to playwright
-
-# Registry operations
-make push-ghcr       # Push to GitHub Container Registry
-make push-local      # Push to local registry
+make -f tools/Makefile ssh-project1    # SSH to project1
+make -f tools/Makefile ssh-project2    # SSH to project2
+make -f tools/Makefile ssh-playwright  # SSH to playwright
 ```
 
-## Configuration Files
+## 🔧 Configuration
 
-- `docker-compose.yml` - Service definitions and networking
-- `base-image/Dockerfile` - Base development environment
-- `playwright-image/Dockerfile` - Browser automation tools
-- `traefik/traefik.yml` - Reverse proxy configuration
-- `dns/dnsmasq.conf` - Local DNS server configuration
-- `Makefile` - Common commands and shortcuts
+- **Docker Compose**: `docker/docker-compose.yml`
+- **Base Image**: `docker/base-image/Dockerfile`
+- **Traefik**: `docker/traefik/traefik.yml`
+- **DNS**: `docker/dns/dnsmasq.conf`
+- **Software**: `tools/software-config.json`
 
-## Development Tools Included
+## 🌟 Features
 
-### Base Image (Essential Tools)
+- 🐳 **Base Development Image**: Ubuntu 22.04 with Git, Python, Node.js, Cursor CLI, OpenCode CLI
+- 🎭 **Playwright Image**: Browser automation tools
+- 🔒 **Automatic SSL**: Let's Encrypt certificates via Traefik
+- 🌐 **Local DNS**: DNSmasq for `*.local.alistairhenderson.info` domains
+- 🔑 **SSH Access**: Key-based authentication to all containers
+- 🚀 **Easy Scaling**: Add new projects with simple scripts
 
-- **Git**: Version control
-- **Python 3**: Python development with basic tools
-- **Node.js & npm**: JavaScript/Node.js development basics
-- **Cursor CLI**: Cursor editor command line tools
-- **OpenCode CLI**: OpenCode development tools
-- **Vim & Neovim**: Text editors
-- **SSH Server**: Secure shell access
+## 📖 Next Steps
 
-#### Visual & Terminal Experience
+1. Read the [main documentation](docs/README.md) for complete details
+2. Follow the [installation guide](docs/INSTALLATION.MD) for setup
+3. Use the [interactive project creator](scripts/create-project-interactive.sh) to add new projects
+4. Check the [roadmap](docs/ROADMAP.md) for upcoming features
 
-- **tmux**: Terminal multiplexer with tiling layout
-- **Zsh**: Advanced shell with Oh My Zsh
-- **Starship**: Beautiful cross-shell prompt
-- **Modern CLI Tools**: bat, exa, fd, ripgrep, procs, bottom
+## 🤝 Contributing
 
-#### Network & System Tools
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
-- **Network Tools**: net-tools, ping, traceroute, nmap, tcpdump
-- **System Monitoring**: htop, iotop, iostat, lsof, strace
-- **File Operations**: tree, fzf, zoxide
+## 📄 License
 
-#### Database Tools
-
-- **CLI Tools**: Prisma, TypeORM, Sequelize, Knex
-- **Database GUI**: @dbgate/cli (open source alternative to DBeaver)
-
-#### Data Processing
-
-- **JSON**: jq, yq
-- **XML**: xmltodict, yq
-- **YAML**: yq
-
-### Playwright Image (extends base)
-
-- **Playwright**: Browser automation
-- **Chromium**: Headless browser
-- **Claude CLI**: AI assistant
-- **All base tools**: Inherited from base image
-
-### Additional Tools (Reference)
-
-See [DEV-TOOLS.md](DEV-TOOLS.md) for comprehensive list of tools you can add when building specific technology stacks.
-
-## Security
-
-- SSH key-based authentication (no passwords)
-- Automatic SSL certificates via Let's Encrypt
-- Isolated Docker networks
-- Read-only SSH key mounting
-- No root access in development containers
-
-## Troubleshooting
-
-See [INSTALLATION.MD](INSTALLATION.MD) for detailed troubleshooting steps.
-
-Common issues:
-- **SSL Issues**: Check AWS credentials and DNS propagation
-- **SSH Issues**: Verify key permissions and container SSH service
-- **DNS Issues**: Check dnsmasq logs and container DNS configuration
-
-## Support
-
-1. Check the troubleshooting section in INSTALLATION.MD
-2. Review Docker and Traefik logs
-3. Verify network connectivity and DNS resolution
-4. Check GitHub issues or create a new one
-
-## License
-
+This project is licensed under the MIT License - see the [LICENSE](docs/LICENSE) file for details.

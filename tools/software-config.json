@@ -1,0 +1,745 @@
+{
+  "development_stacks": {
+    "nodejs": {
+      "name": "Node.js",
+      "description": "JavaScript/TypeScript runtime and package manager",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["nodejs", "npm"],
+            "repository": "deb https://deb.nodesource.com/node_20.x $(lsb_release -cs) main",
+            "key": "https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key"
+          },
+          "manual": {
+            "script": "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -",
+            "packages": ["nodejs"]
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["nodejs", "npm"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "20.x",
+        "lts": "18.x",
+        "current": "21.x"
+      },
+      "post_install": [
+        "npm install -g npm@latest",
+        "npm install -g yarn"
+      ]
+    },
+    "python": {
+      "name": "Python",
+      "description": "Python interpreter and pip package manager",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["python3", "python3-pip", "python3-venv", "python3-dev", "build-essential"]
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["python3", "py3-pip", "python3-dev", "build-base"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "3.12",
+        "stable": "3.11",
+        "legacy": "3.10"
+      },
+      "post_install": [
+        "pip3 install --upgrade pip",
+        "pip3 install virtualenv"
+      ]
+    },
+    "rust": {
+      "name": "Rust",
+      "description": "Systems programming language and Cargo",
+      "install_methods": {
+        "universal": {
+          "script": "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y",
+          "post_script": "source $HOME/.cargo/env"
+        }
+      },
+      "versions": {
+        "latest": "stable",
+        "stable": "stable",
+        "nightly": "nightly"
+      },
+      "post_install": [
+        "cargo install cargo-edit",
+        "cargo install cargo-watch"
+      ]
+    },
+    "go": {
+      "name": "Go",
+      "description": "Google's programming language",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["golang-go"]
+          },
+          "manual": {
+            "script": "curl -fsSL https://go.dev/dl/go1.21.5.linux-amd64.tar.gz | sudo tar -C /usr/local -xzf -",
+            "env_vars": {
+              "GOPATH": "/go",
+              "PATH": "/usr/local/go/bin:$PATH"
+            }
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["go"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "1.21.5",
+        "stable": "1.21.5",
+        "beta": "1.22.0"
+      }
+    },
+    "java": {
+      "name": "Java",
+      "description": "Enterprise programming language with Maven/Gradle",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["openjdk-17-jdk", "maven", "gradle"],
+            "repository": "ppa:openjdk-r/ppa"
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["openjdk17-jdk", "maven", "gradle"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "17",
+        "lts": "17",
+        "legacy": "11"
+      }
+    },
+    "dotnet": {
+      "name": ".NET",
+      "description": "Microsoft's cross-platform framework",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["dotnet-sdk-8.0"],
+            "repository": "https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb",
+            "key": "https://packages.microsoft.com/keys/microsoft.asc"
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["dotnet8-sdk"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "8.0",
+        "lts": "8.0",
+        "legacy": "6.0"
+      }
+    },
+    "php": {
+      "name": "PHP",
+      "description": "Web development language with Composer",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["php8.1", "php8.1-cli", "php8.1-fpm", "php8.1-mysql", "php8.1-xml", "php8.1-curl", "php8.1-mbstring", "php8.1-zip", "composer"]
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["php81", "php81-cli", "php81-fpm", "php81-mysqli", "php81-xml", "php81-curl", "php81-mbstring", "php81-zip", "composer"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "8.1",
+        "stable": "8.1",
+        "legacy": "7.4"
+      }
+    },
+    "ruby": {
+      "name": "Ruby",
+      "description": "Dynamic programming language with Gem",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["ruby", "ruby-dev", "ruby-bundler", "build-essential"]
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["ruby", "ruby-dev", "ruby-bundler", "build-base"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "3.2",
+        "stable": "3.2",
+        "legacy": "2.7"
+      }
+    }
+  },
+  "databases": {
+    "postgresql": {
+      "name": "PostgreSQL",
+      "description": "Advanced open source database",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["postgresql", "postgresql-contrib", "postgresql-client"],
+            "repository": "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main",
+            "key": "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["postgresql", "postgresql-contrib", "postgresql-client"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "15",
+        "stable": "15",
+        "lts": "14"
+      },
+      "default_port": 5432,
+      "config_files": ["/etc/postgresql/*/main/postgresql.conf", "/etc/postgresql/*/main/pg_hba.conf"]
+    },
+    "mysql": {
+      "name": "MySQL",
+      "description": "Popular open source database",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["mysql-server", "mysql-client"],
+            "repository": "deb http://repo.mysql.com/apt/ubuntu $(lsb_release -cs) mysql-8.0",
+            "key": "https://repo.mysql.com/RPM-GPG-KEY-mysql-2022"
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["mysql", "mysql-client"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "8.0",
+        "stable": "8.0",
+        "lts": "5.7"
+      },
+      "default_port": 3306,
+      "config_files": ["/etc/mysql/mysql.conf.d/mysqld.cnf"]
+    },
+    "mongodb": {
+      "name": "MongoDB",
+      "description": "NoSQL document database",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["mongodb-org"],
+            "repository": "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/6.0 multiverse",
+            "key": "https://www.mongodb.org/static/pgp/server-6.0.asc"
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["mongodb"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "6.0",
+        "stable": "6.0",
+        "legacy": "5.0"
+      },
+      "default_port": 27017,
+      "config_files": ["/etc/mongod.conf"]
+    },
+    "redis": {
+      "name": "Redis",
+      "description": "In-memory data structure store",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["redis-server", "redis-tools"]
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["redis"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "7.2",
+        "stable": "7.2",
+        "lts": "6.2"
+      },
+      "default_port": 6379,
+      "config_files": ["/etc/redis/redis.conf"]
+    },
+    "elasticsearch": {
+      "name": "Elasticsearch",
+      "description": "Search and analytics engine",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["elasticsearch"],
+            "repository": "deb https://artifacts.elastic.co/packages/8.x/apt stable main",
+            "key": "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["elasticsearch"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "8.11",
+        "stable": "8.11",
+        "lts": "7.17"
+      },
+      "default_port": 9200,
+      "config_files": ["/etc/elasticsearch/elasticsearch.yml"]
+    },
+    "sqlite": {
+      "name": "SQLite",
+      "description": "Lightweight file-based database",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["sqlite3", "sqlite3-doc"]
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["sqlite"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "3.44",
+        "stable": "3.44",
+        "legacy": "3.39"
+      },
+      "default_port": null,
+      "config_files": []
+    }
+  },
+  "web_servers": {
+    "nginx": {
+      "name": "Nginx",
+      "description": "High-performance web server",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["nginx", "nginx-extras"]
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["nginx"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "1.24",
+        "stable": "1.24",
+        "lts": "1.22"
+      },
+      "default_port": 80,
+      "config_files": ["/etc/nginx/nginx.conf", "/etc/nginx/sites-available/default"],
+      "service_name": "nginx"
+    },
+    "apache": {
+      "name": "Apache",
+      "description": "Popular web server",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["apache2", "apache2-utils"]
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["apache2"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "2.4",
+        "stable": "2.4",
+        "lts": "2.4"
+      },
+      "default_port": 80,
+      "config_files": ["/etc/apache2/apache2.conf", "/etc/apache2/sites-available/000-default.conf"],
+      "service_name": "apache2"
+    },
+    "caddy": {
+      "name": "Caddy",
+      "description": "Modern web server with automatic HTTPS",
+      "install_methods": {
+        "universal": {
+          "script": "curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg",
+          "repository": "deb [signed-by=/usr/share/keyrings/caddy-stable-archive-keyring.gpg] https://dl.cloudsmith.io/public/caddy/stable/deb/deb any-version main",
+          "packages": ["caddy"]
+        }
+      },
+      "versions": {
+        "latest": "2.7",
+        "stable": "2.7",
+        "beta": "2.8"
+      },
+      "default_port": 80,
+      "config_files": ["/etc/caddy/Caddyfile"],
+      "service_name": "caddy"
+    },
+    "traefik": {
+      "name": "Traefik",
+      "description": "Cloud-native edge router",
+      "install_methods": {
+        "universal": {
+          "binary": {
+            "url": "https://github.com/traefik/traefik/releases/latest/download/traefik_linux_amd64",
+            "install_path": "/usr/local/bin/traefik"
+          }
+        }
+      },
+      "versions": {
+        "latest": "3.0",
+        "stable": "3.0",
+        "beta": "3.1"
+      },
+      "default_port": 80,
+      "config_files": ["/etc/traefik/traefik.yml"],
+      "service_name": "traefik"
+    }
+  },
+  "development_tools": {
+    "git": {
+      "name": "Git",
+      "description": "Version control system",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["git", "git-core"]
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["git"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "2.42",
+        "stable": "2.42",
+        "lts": "2.41"
+      },
+      "post_install": [
+        "git config --global init.defaultBranch main",
+        "git config --global pull.rebase false"
+      ]
+    },
+    "vim": {
+      "name": "Vim",
+      "description": "Advanced text editor",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["vim", "vim-gtk3", "vim-gnome"]
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["vim"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "9.0",
+        "stable": "9.0",
+        "legacy": "8.2"
+      }
+    },
+    "vscode": {
+      "name": "VS Code",
+      "description": "Code editor with extensions",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["code"],
+            "repository": "deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/repos/code stable main",
+            "key": "https://packages.microsoft.com/keys/microsoft.asc"
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["code"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "1.85",
+        "stable": "1.85",
+        "insider": "1.86"
+      }
+    },
+    "jetbrains": {
+      "name": "JetBrains IDEs",
+      "description": "Professional development tools",
+      "install_methods": {
+        "universal": {
+          "snap": {
+            "packages": ["intellij-idea-community", "pycharm-community", "webstorm"]
+          },
+          "manual": {
+            "url": "https://www.jetbrains.com/toolbox-app/",
+            "install_path": "/opt/jetbrains-toolbox"
+          }
+        }
+      },
+      "versions": {
+        "latest": "2023.3",
+        "stable": "2023.3",
+        "eap": "2024.1"
+      }
+    },
+    "docker": {
+      "name": "Docker",
+      "description": "Container platform",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["docker.io", "docker-compose"],
+            "repository": "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable",
+            "key": "https://download.docker.com/linux/ubuntu/gpg"
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["docker", "docker-compose"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "24.0",
+        "stable": "24.0",
+        "edge": "25.0"
+      },
+      "post_install": [
+        "sudo usermod -aG docker $USER",
+        "sudo systemctl enable docker"
+      ]
+    },
+    "kubernetes": {
+      "name": "Kubernetes",
+      "description": "Container orchestration",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["kubectl"],
+            "repository": "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main",
+            "key": "https://dl.k8s.io/apt/doc/apt-key.gpg"
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["kubectl"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "1.28",
+        "stable": "1.28",
+        "lts": "1.27"
+      }
+    }
+  },
+  "monitoring_tools": {
+    "prometheus": {
+      "name": "Prometheus",
+      "description": "Monitoring and alerting",
+      "install_methods": {
+        "universal": {
+          "binary": {
+            "url": "https://github.com/prometheus/prometheus/releases/latest/download/prometheus-2.47.0.linux-amd64.tar.gz",
+            "install_path": "/opt/prometheus"
+          }
+        }
+      },
+      "versions": {
+        "latest": "2.47",
+        "stable": "2.47",
+        "beta": "2.48"
+      },
+      "default_port": 9090,
+      "config_files": ["/etc/prometheus/prometheus.yml"]
+    },
+    "grafana": {
+      "name": "Grafana",
+      "description": "Metrics visualization and alerting",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["grafana"],
+            "repository": "deb https://packages.grafana.com/oss/deb stable main",
+            "key": "https://packages.grafana.com/gpg.key"
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["grafana"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "10.2",
+        "stable": "10.2",
+        "beta": "10.3"
+      },
+      "default_port": 3000,
+      "config_files": ["/etc/grafana/grafana.ini"]
+    },
+    "elk": {
+      "name": "ELK Stack",
+      "description": "Log management and analysis",
+      "install_methods": {
+        "ubuntu": {
+          "apt": {
+            "packages": ["elasticsearch", "logstash", "kibana"],
+            "repository": "deb https://artifacts.elastic.co/packages/8.x/apt stable main",
+            "key": "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+          }
+        },
+        "alpine": {
+          "apk": {
+            "packages": ["elasticsearch", "logstash", "kibana"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "8.11",
+        "stable": "8.11",
+        "lts": "7.17"
+      },
+      "default_ports": {
+        "elasticsearch": 9200,
+        "logstash": 5044,
+        "kibana": 5601
+      }
+    },
+    "jaeger": {
+      "name": "Jaeger",
+      "description": "Distributed tracing",
+      "install_methods": {
+        "universal": {
+          "docker": {
+            "image": "jaegertracing/all-in-one:latest",
+            "ports": ["16686:16686", "14268:14268"]
+          }
+        }
+      },
+      "versions": {
+        "latest": "1.53",
+        "stable": "1.53",
+        "beta": "1.54"
+      },
+      "default_port": 16686
+    }
+  },
+  "cli_tools": {
+    "cursor": {
+      "name": "Cursor CLI",
+      "description": "AI-powered code editor CLI",
+      "install_methods": {
+        "universal": {
+          "script": "curl https://cursor.com/install -fsS | bash"
+        }
+      },
+      "versions": {
+        "latest": "0.1.0",
+        "stable": "0.1.0"
+      }
+    },
+    "opencode": {
+      "name": "OpenCode CLI",
+      "description": "AI-powered development assistant",
+      "install_methods": {
+        "universal": {
+          "script": "curl -fsSL https://opencode.ai/install | bash",
+          "npm": "npm install -g opencode-ai"
+        }
+      },
+      "versions": {
+        "latest": "1.0.0",
+        "stable": "1.0.0"
+      }
+    }
+  },
+  "package_managers": {
+    "npm": {
+      "name": "Node Package Manager",
+      "description": "JavaScript package manager",
+      "install_methods": {
+        "universal": {
+          "script": "curl -fsSL https://www.npmjs.com/install.sh | sh"
+        }
+      },
+      "versions": {
+        "latest": "10.2",
+        "stable": "10.2",
+        "lts": "9.8"
+      }
+    },
+    "pip": {
+      "name": "Python Package Installer",
+      "description": "Python package manager",
+      "install_methods": {
+        "universal": {
+          "script": "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py"
+        }
+      },
+      "versions": {
+        "latest": "23.3",
+        "stable": "23.3",
+        "legacy": "22.3"
+      }
+    },
+    "cargo": {
+      "name": "Rust Package Manager",
+      "description": "Rust package manager",
+      "install_methods": {
+        "universal": {
+          "script": "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+        }
+      },
+      "versions": {
+        "latest": "1.75",
+        "stable": "1.75",
+        "nightly": "1.76"
+      }
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2024-08-21",
+    "maintainer": "Project Container Creator",
+    "description": "Software installation configuration for development containers",
+    "supported_platforms": ["ubuntu", "alpine", "debian", "centos"],
+    "update_frequency": "monthly"
+  }
+}
