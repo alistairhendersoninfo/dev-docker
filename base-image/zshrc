@@ -1,0 +1,45 @@
+# Useful aliases for development
+alias ll='exa -la'
+alias la='exa -la'
+alias ls='exa'
+alias cat='bat'
+alias grep='rg'
+alias find='fd'
+alias ps='procs'
+alias top='btm'
+alias du='dust'
+alias df='duf'
+
+# Development shortcuts
+alias dev='tmux new-session -s dev'
+alias deva='tmux attach-session -t dev'
+alias devl='tmux list-sessions'
+
+# Network shortcuts
+alias myip='curl -s https://ipinfo.io/ip'
+alias ports='netstat -tulpn'
+alias ping='ping -c 4'
+
+# Git shortcuts
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git log --oneline'
+
+# Docker shortcuts
+alias dps='docker ps'
+alias dpa='docker ps -a'
+alias di='docker images'
+alias dex='docker exec -it'
+
+# Quick directory navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# Load starship prompt
+eval "$(starship init zsh)"
+
+# Load zoxide
+eval "$(zoxide init zsh)"

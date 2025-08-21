@@ -1,0 +1,30 @@
+# Project Template - Copy this block to add a new project
+# Replace PROJECT_NAME, PROJECT_PORT, and PROJECT_IP with your values
+
+PROJECT_NAME:
+  image: dev-base:latest
+  container_name: PROJECT_NAME
+  hostname: PROJECT_NAME.docker
+  labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.PROJECT_NAME.rule=Host(`PROJECT_NAME-local.alistairhenderson.info`)"
+    - "traefik.http.routers.PROJECT_NAME.entrypoints=websecure"
+    - "traefik.http.routers.PROJECT_NAME.tls=true"
+    - "traefik.http.routers.PROJECT_NAME.tls.certresolver=letsencrypt"
+  ports:
+    - "PROJECT_PORT:22"
+  networks:
+    devnet:
+      ipv4_address: PROJECT_IP
+  dns:
+    - 172.20.0.2
+  depends_on:
+    - base-image
+
+# Example usage:
+# PROJECT_NAME=myproject
+# PROJECT_PORT=2224
+# PROJECT_IP=172.20.0.13
+# 
+# Then add to docker-compose.yml and run:
+# docker compose up -d
