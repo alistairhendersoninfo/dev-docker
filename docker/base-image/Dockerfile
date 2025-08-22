@@ -46,21 +46,42 @@ RUN curl -fsSL https://claude.ai/install | bash
 # Install essential development tools
 # (Node.js and Python tools will be installed per-project as needed)
 
-# Install essential lightweight CLI tools
+# Install essential lightweight CLI tools (available in Ubuntu repos)
 RUN apt-get update && apt-get install -y \
     jq \
-    yq \
     xmlstarlet \
-    ripgrep \
-    fd-find \
-    bat \
-    exa \
     fzf \
     tree \
     htop \
     ncdu \
-    tldr \
     && apt-get clean
+
+# Install yq manually (not in Ubuntu repos)
+RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 && \
+    chmod a+x /usr/local/bin/yq
+
+# Install ripgrep manually (newer version than Ubuntu repos)
+RUN wget -qO /tmp/ripgrep.deb https://github.com/BurntSushi/ripgrep/releases/latest/download/ripgrep_*_amd64.deb && \
+    dpkg -i /tmp/ripgrep.deb && \
+    rm /tmp/ripgrep.deb
+
+# Install fd-find manually (newer version than Ubuntu repos)
+RUN wget -qO /tmp/fd.deb https://github.com/sharkdp/fd/releases/latest/download/fd_*_amd64.deb && \
+    dpkg -i /tmp/fd.deb && \
+    rm /tmp/fd.deb
+
+# Install bat manually (newer version than Ubuntu repos)
+RUN wget -qO /tmp/bat.deb https://github.com/sharkdp/bat/releases/latest/download/bat_*_amd64.deb && \
+    dpkg -i /tmp/bat.deb && \
+    rm /tmp/bat.deb
+
+# Install exa manually (newer version than Ubuntu repos)
+RUN wget -qO /tmp/exa.deb https://github.com/ogham/exa/releases/latest/download/exa_*_amd64.deb && \
+    dpkg -i /tmp/exa.deb && \
+    rm /tmp/exa.deb
+
+# Install tldr manually (not in Ubuntu repos)
+RUN npm install -g tldr
 
 # Install additional useful tools
 RUN npm install -g \
