@@ -1,0 +1,271 @@
+name: Project Task to Issue and Branch Automation
+
+on:
+  # Trigger when project items are moved or updated
+  project:
+    types: [edited]
+  
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      project_item_id:
+        description: 'Project Item ID to process'
+        required: true
+        type: string
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - 'create_issue_and_branch'
+          - 'create_pr'
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  PROJECT_NUMBER: 6
+  PROJECT_OWNER: alistairhendersoninfo
+
+jobs:
+  process-task:
+    runs-on: ubuntu-latest
+    if: github.event.project.action == 'edited' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup GitHub CLI
+        run: |
+          gh --version
+          gh auth status
+
+      - name: Get Project Item Details
+        id: get_item
+        run: |
+          # Get project item details
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ITEM_ID="${{ github.event.inputs.project_item_id }}"
+          else
+            # Extract item ID from project event (this may need adjustment based on actual webhook payload)
+            ITEM_ID="${{ github.event.project.item_id }}"
+          fi
+          
+          echo "Processing item: $ITEM_ID"
+          
+          # Get item details using GitHub CLI
+          ITEM_DATA=$(gh project item-list ${{ env.PROJECT_NUMBER }} --owner ${{ env.PROJECT_OWNER }} --format json)
+          
+          # Extract item information (title, status, etc.)
+          ITEM_TITLE=$(echo "$ITEM_DATA" | jq -r --arg id "$ITEM_ID" '.items[] | select(.id == $id) | .content.title')
+          ITEM_STATUS=$(echo "$ITEM_DATA" | jq -r --arg id "$ITEM_ID" '.items[] | select(.id == $id) | .status')
+          
+          echo "item_id=$ITEM_ID" >> $GITHUB_OUTPUT
+          echo "item_title=$ITEM_TITLE" >> $GITHUB_OUTPUT
+          echo "item_status=$ITEM_STATUS" >> $GITHUB_OUTPUT
+          
+          echo "Item: $ITEM_TITLE"
+          echo "Status: $ITEM_STATUS"
+
+      - name: Create Enhancement Issue
+        id: create_issue
+        if: steps.get_item.outputs.item_status == 'In Progress' || github.event.inputs.action == 'create_issue_and_branch'
+        run: |
+          TITLE="${{ steps.get_item.outputs.item_title }}"
+          
+          # Create issue body with project reference
+          ISSUE_BODY="## Enhancement Request
+          
+          This issue was automatically created from GitHub Project task.
+          
+          **Project**: [Dev-Docker Development Roadmap](https://github.com/users/${{ env.PROJECT_OWNER }}/projects/${{ env.PROJECT_NUMBER }})
+          **Task**: $TITLE
+          **Project Item ID**: ${{ steps.get_item.outputs.item_id }}
+          
+          ## Implementation Plan
+          
+          - [ ] Analyze requirements
+          - [ ] Design implementation approach
+          - [ ] Implement core functionality
+          - [ ] Add tests and documentation
+          - [ ] Create pull request
+          
+          ## Acceptance Criteria
+          
+          To be defined based on project task requirements.
+          
+          ## Notes
+          
+          This issue is linked to the GitHub Project task. Updates here will be reflected in the project board.
+          
+          ---
+          *Auto-generated from GitHub Project automation*"
+          
+          # Create the issue
+          ISSUE_URL=$(gh issue create \
+            --title "Enhancement: $TITLE" \
+            --body "$ISSUE_BODY" \
+            --label "enhancement,project-task" \
+            --assignee "${{ env.PROJECT_OWNER }}")
+          
+          ISSUE_NUMBER=$(echo "$ISSUE_URL" | grep -o '[0-9]*$')
+          
+          echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
+          echo "issue_url=$ISSUE_URL" >> $GITHUB_OUTPUT
+          
+          echo "Created issue #$ISSUE_NUMBER: $ISSUE_URL"
+
+      - name: Add Issue to Project
+        if: steps.create_issue.outputs.issue_number
+        run: |
+          # Link the issue back to the project
+          gh project item-add ${{ env.PROJECT_NUMBER }} \
+            --owner ${{ env.PROJECT_OWNER }} \
+            --url "${{ steps.create_issue.outputs.issue_url }}"
+          
+          echo "Added issue #${{ steps.create_issue.outputs.issue_number }} to project"
+
+      - name: Create Feature Branch
+        id: create_branch
+        if: steps.create_issue.outputs.issue_number
+        run: |
+          ISSUE_NUMBER="${{ steps.create_issue.outputs.issue_number }}"
+          TITLE="${{ steps.get_item.outputs.item_title }}"
+          
+          # Create branch name from issue title
+          BRANCH_NAME="feature/issue-${ISSUE_NUMBER}-$(echo "$TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')"
+          
+          # Ensure branch name isn't too long
+          BRANCH_NAME=$(echo "$BRANCH_NAME" | cut -c1-60)
+          
+          echo "Creating branch: $BRANCH_NAME"
+          
+          # Create and push the branch
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git checkout -b "$BRANCH_NAME"
+          
+          # Create initial commit with project structure
+          mkdir -p "work/issue-${ISSUE_NUMBER}"
+          
+          cat > "work/issue-${ISSUE_NUMBER}/README.md" << EOF
+          # Enhancement: $TITLE
+          
+          **Issue**: #${ISSUE_NUMBER}
+          **Project Task**: ${{ steps.get_item.outputs.item_id }}
+          **Branch**: \`$BRANCH_NAME\`
+          
+          ## Overview
+          
+          This directory contains work for the enhancement: "$TITLE"
+          
+          ## Progress
+          
+          - [ ] Requirements analysis
+          - [ ] Implementation
+          - [ ] Testing
+          - [ ] Documentation
+          
+          ## Files
+          
+          Add implementation files here as you work on the enhancement.
+          
+          ## Notes
+          
+          Use this space to document decisions, challenges, and solutions.
+          EOF
+          
+          git add .
+          git commit -m "feat: Initialize work for issue #${ISSUE_NUMBER} - $TITLE
+
+          - Created work directory for enhancement
+          - Added initial README with task overview
+          - Ready for implementation
+
+          Closes #${ISSUE_NUMBER}
+          Project: https://github.com/users/${{ env.PROJECT_OWNER }}/projects/${{ env.PROJECT_NUMBER }}"
+          
+          git push origin "$BRANCH_NAME"
+          
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "Created and pushed branch: $BRANCH_NAME"
+
+      - name: Create Draft Pull Request
+        if: steps.create_branch.outputs.branch_name && (github.event.inputs.action == 'create_issue_and_branch' || github.event.inputs.action == 'create_pr')
+        run: |
+          BRANCH_NAME="${{ steps.create_branch.outputs.branch_name }}"
+          ISSUE_NUMBER="${{ steps.create_issue.outputs.issue_number }}"
+          TITLE="${{ steps.get_item.outputs.item_title }}"
+          
+          PR_BODY="## Enhancement Implementation
+          
+          **Implements**: #${ISSUE_NUMBER}
+          **Project Task**: ${{ steps.get_item.outputs.item_id }}
+          **Project Board**: [Dev-Docker Development Roadmap](https://github.com/users/${{ env.PROJECT_OWNER }}/projects/${{ env.PROJECT_NUMBER }})
+          
+          ## Overview
+          
+          This pull request implements the enhancement: \"$TITLE\"
+          
+          ## Changes
+          
+          - [ ] Core functionality implemented
+          - [ ] Tests added
+          - [ ] Documentation updated
+          - [ ] Integration with existing system verified
+          
+          ## Implementation Details
+          
+          (To be filled in during development)
+          
+          ## Testing
+          
+          (To be filled in during development)
+          
+          ## Checklist
+          
+          - [ ] Code follows project standards
+          - [ ] Tests pass
+          - [ ] Documentation is updated
+          - [ ] No breaking changes
+          - [ ] Ready for review
+          
+          ## Notes
+          
+          This PR was automatically created from the GitHub Project task automation.
+          
+          ---
+          **Closes**: #${ISSUE_NUMBER}
+          **Project**: https://github.com/users/${{ env.PROJECT_OWNER }}/projects/${{ env.PROJECT_NUMBER }}"
+          
+          # Create draft PR
+          PR_URL=$(gh pr create \
+            --title "feat: $TITLE" \
+            --body "$PR_BODY" \
+            --head "$BRANCH_NAME" \
+            --base "main" \
+            --draft \
+            --label "enhancement,project-task")
+          
+          echo "Created draft PR: $PR_URL"
+          
+          # Add PR to project
+          gh project item-add ${{ env.PROJECT_NUMBER }} \
+            --owner ${{ env.PROJECT_OWNER }} \
+            --url "$PR_URL"
+          
+          echo "Added PR to project board"
+
+      - name: Update Project Task Status
+        if: steps.create_issue.outputs.issue_number
+        run: |
+          echo "Task automation completed successfully!"
+          echo "- Issue #${{ steps.create_issue.outputs.issue_number }} created"
+          echo "- Branch ${{ steps.create_branch.outputs.branch_name }} created"
+          echo "- Ready for development work"
+          
+          # Note: Updating project item status programmatically requires GraphQL API
+          # This can be implemented if needed using GitHub's GraphQL API
