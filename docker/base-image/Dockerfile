@@ -83,9 +83,8 @@ RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master
 # Install database tools
 # (Database CLI tools will be installed per-project as needed)
 
-# Create developer user and sudo group
-RUN groupadd -r sudo && \
-    useradd -m -s /bin/bash -G sudo developer
+# Create developer user and add to sudo group (sudo group already exists in Ubuntu)
+RUN useradd -m -s /bin/bash -G sudo developer
 
 # Create SSH directory and set permissions
 RUN mkdir -p /home/developer/.ssh && \
