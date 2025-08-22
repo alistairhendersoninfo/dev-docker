@@ -113,10 +113,13 @@ echo "Which images would you like to build?"
 echo "1) Minimal image only (bare shell with VIM - fastest)"
 echo "2) Development image only (full tools - Cursor, OpenCode, Claude CLIs)"
 echo "3) Both images (recommended for first time setup)"
-echo "4) Skip building (use existing images)"
+echo "4) Traefik server"
+echo "5) DNS server (placeholder)"
+echo "6) Skip building (use existing images)"
+echo "7) Exit"
 echo ""
 
-read -p "Enter your choice (1-4): " build_choice
+read -p "Enter your choice (1-7): " build_choice
 
 case $build_choice in
     1)
@@ -158,7 +161,23 @@ case $build_choice in
         fi
         ;;
     4)
+        print_status "Building Traefik server..."
+        if [[ "$(docker images -q dev-traefik:latest 2> /dev/null)" == "" ]]; then
+            docker build -t dev-traefik:latest traefik
+            print_success "Traefik server built successfully"
+        else
+            print_success "Traefik server already exists"
+        fi
+        ;;
+    5)
+        print_status "DNS server is a placeholder - no build needed"
+        ;;
+    6)
         print_status "Skipping image builds - using existing images"
+        ;;
+    7)
+        print_status "Exiting..."
+        exit 0
         ;;
     *)
         print_error "Invalid choice. Defaulting to building both images..."
