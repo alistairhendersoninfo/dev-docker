@@ -60,7 +60,9 @@ list_project_tasks() {
     echo "📋 Available Project Tasks:"
     echo "=========================="
     
-    gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --format table
+    # Get tasks and display them
+    gh project item-list "$PROJECT_NUMBER" --owner "$PROJECT_OWNER" --format json | \
+    jq -r '.items[] | "• " + .content.title + " (Status: " + (.status // "No Status") + ")"'
 }
 
 # Get task details
