@@ -1,11 +1,9 @@
 {
   "mcp.servers": {
     "github": {
-      "command": "/opt/github-mcp-server/github-mcp-server",
-      "args": ["stdio"],
+      "command": "nc",
+      "args": ["localhost", "3000"],
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN_FILE": "/opt/github-mcp-server/config/github-token",
-        "GITHUB_TOOLSETS": "repos,issues,pull_requests,actions,context",
         "GITHUB_PROJECT_NUMBER": "6",
         "GITHUB_PROJECT_OWNER": "alistairhendersoninfo",
         "GITHUB_REPO_NAME": "dev-docker"
