@@ -125,7 +125,7 @@ case $build_choice in
     1)
         print_status "Building minimal image only..."
         if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
-            docker build -t dev-minimal:latest -f base-image/Dockerfile.minimal base-image
+            docker build -t dev-minimal:latest -f docker/base-image/Dockerfile.minimal docker/base-image
             print_success "Minimal image built successfully"
         else
             print_success "Minimal image already exists"
@@ -134,7 +134,7 @@ case $build_choice in
     2)
         print_status "Building development image only..."
         if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
-            docker build -t dev-base:latest base-image
+            docker build -t dev-base:latest docker/base-image
             print_success "Development image built successfully"
         else
             print_success "Development image already exists"
@@ -145,7 +145,7 @@ case $build_choice in
         # Build minimal image
         if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
             print_status "Building minimal image (bare shell with VIM)..."
-            docker build -t dev-minimal:latest -f base-image/Dockerfile.minimal base-image
+            docker build -t dev-minimal:latest -f docker/base-image/Dockerfile.minimal docker/base-image
             print_success "Minimal image built successfully"
         else
             print_success "Minimal image already exists"
@@ -154,7 +154,7 @@ case $build_choice in
         # Build development image
         if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
             print_status "Building development base image (full tools)..."
-            docker build -t dev-base:latest base-image
+            docker build -t dev-base:latest docker/base-image
             print_success "Development base image built successfully"
         else
             print_success "Development base image already exists"
@@ -222,10 +222,10 @@ case $build_choice in
         print_error "Invalid choice. Defaulting to building both images..."
         # Default to building both
         if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
-            docker build -t dev-minimal:latest -f base-image/Dockerfile.minimal base-image
+            docker build -t dev-minimal:latest -f docker/base-image/Dockerfile.minimal docker/base-image
         fi
         if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
-            docker build -t dev-base:latest base-image
+            docker build -t dev-base:latest docker/base-image
         fi
         ;;
 esac
@@ -233,7 +233,7 @@ esac
 # Always check for playwright image (required for full functionality)
 if [[ "$(docker images -q dev-playwright:latest 2> /dev/null)" == "" ]]; then
     print_status "Building Playwright image (required for browser automation)..."
-    docker build -t dev-playwright:latest playwright-image
+    docker build -t dev-playwright:latest docker/playwright-image
     print_success "Playwright image built successfully"
 else
     print_success "Playwright image already exists"
