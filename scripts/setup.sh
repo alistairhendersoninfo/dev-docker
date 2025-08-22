@@ -50,9 +50,9 @@ if ! grep -q "$(cat ~/.ssh/id_rsa.pub)" ~/.ssh/authorized_keys; then
 fi
 
 # Set correct permissions on SSL certificate file
-if [[ -f traefik/acme.json ]]; then
+if [[ -f docker/traefik/acme.json ]]; then
     echo "🔒 Setting permissions on acme.json..."
-    chmod 600 traefik/acme.json
+    chmod 600 docker/traefik/acme.json
 fi
 
 # Check if AWS credentials exist
@@ -67,8 +67,8 @@ if [[ ! -f ~/.aws/credentials ]]; then
 fi
 
 # Check if Traefik email is configured
-if grep -q "your-email@example.com" traefik/traefik.yml; then
-    echo "⚠️  Please update the email address in traefik/traefik.yml"
+if grep -q "your-email@example.com" docker/traefik/traefik.yml; then
+    echo "⚠️  Please update the email address in docker/traefik/traefik.yml"
     echo "   Replace 'your-email@example.com' with your actual email"
 fi
 
@@ -77,7 +77,7 @@ echo "✅ Basic setup complete!"
 echo ""
 echo "Next steps:"
 echo "1. Configure AWS credentials for Route53 DNS challenge"
-echo "2. Update email in traefik/traefik.yml"
+echo "2. Update email in docker/traefik/traefik.yml"
 echo "3. Add DNS wildcard record: *.local.alistairhenderson.info → your server IP"
 echo "4. Build base images: make build-base"
 echo "5. Start services: docker compose up -d"

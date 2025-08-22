@@ -22,8 +22,8 @@ services:
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./traefik:/etc/traefik
-      - ./traefik/acme.json:/etc/traefik/acme.json
+      - ./docker/traefik:/etc/traefik
+      - ./docker/traefik/acme.json:/etc/traefik/acme.json
       - ~/.aws:/root/.aws:ro
     environment:
       - AWS_REGION=us-east-1

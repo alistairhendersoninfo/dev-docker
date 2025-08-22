@@ -145,7 +145,7 @@ cd dev-docker
 ### Set correct permissions on SSL certificate file
 
 ```bash
-chmod 600 traefik/acme.json
+chmod 600 docker/traefik/acme.json
 ```
 
 ### Configure AWS credentials for Route53 DNS challenge
@@ -171,7 +171,7 @@ chmod 600 ~/.aws/config
 ### Update Traefik configuration with your email
 
 ```bash
-sed -i 's/your-email@example.com/YOUR_EMAIL@example.com/' traefik/traefik.yml
+sed -i 's/your-email@example.com/YOUR_EMAIL@example.com/' docker/traefik/traefik.yml
 ```
 
 ## Step 5: Build Base Images
