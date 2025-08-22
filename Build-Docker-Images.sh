@@ -112,9 +112,9 @@ echo ""
 echo "Which images would you like to build?"
 echo "1) Minimal image only (bare shell with VIM - fastest)"
 echo "2) Development image only (full tools - Cursor, OpenCode, Claude CLIs)"
-echo "3) Both images (recommended for first time setup)"
-echo "4) Traefik server"
-echo "5) DNS server (placeholder)"
+echo "3) Playwright image only (browser automation)"
+echo "4) All images (minimal + development + playwright - recommended)"
+echo "5) Traefik configuration"
 echo "6) Skip building (use existing images)"
 echo "7) Exit"
 echo ""
@@ -141,7 +141,22 @@ case $build_choice in
         fi
         ;;
     3)
-        print_status "Building both images..."
+        print_status "Building Playwright image only..."
+        if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
+            print_status "Building base image first (required for Playwright)..."
+            docker build -t dev-base:latest docker/base-image
+            print_success "Base image built successfully"
+        fi
+        if [[ "$(docker images -q dev-playwright:latest 2> /dev/null)" == "" ]]; then
+            print_status "Building Playwright image..."
+            docker build -t dev-playwright:latest docker/playwright-image
+            print_success "Playwright image built successfully"
+        else
+            print_success "Playwright image already exists"
+        fi
+        ;;
+    4)
+        print_status "Building all images..."
         # Build minimal image
         if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
             print_status "Building minimal image (bare shell with VIM)..."
@@ -159,8 +174,17 @@ case $build_choice in
         else
             print_success "Development base image already exists"
         fi
+        
+        # Build Playwright image
+        if [[ "$(docker images -q dev-playwright:latest 2> /dev/null)" == "" ]]; then
+            print_status "Building Playwright image (browser automation)..."
+            docker build -t dev-playwright:latest docker/playwright-image
+            print_success "Playwright image built successfully"
+        else
+            print_success "Playwright image already exists"
+        fi
         ;;
-    4)
+    5)
         print_status "Configuring Traefik (using official image)..."
         
         # Prompt for domain and email configuration
@@ -203,9 +227,6 @@ case $build_choice in
         
         print_success "Traefik configuration updated - using official image from docker-compose.yml"
         ;;
-    5)
-        print_status "DNS server is a placeholder - no build needed"
-        ;;
     6)
         print_status "Skipping image builds - using existing images"
         ;;
@@ -214,7 +235,7 @@ case $build_choice in
         exit 0
         ;;
     *)
-        print_error "Invalid choice. Defaulting to building both images..."
+        print_error "Invalid choice. Defaulting to building all images..."
         # Default to building both
         if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
             docker build -t dev-minimal:latest -f docker/base-image/Dockerfile.minimal docker/base-image
