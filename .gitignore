@@ -215,3 +215,6 @@ roadmap.md
 
 # Claude AI interaction files (internal workflow and project management)
 .claude/
+
+# Cursor IDE configuration (MCP settings, IDE preferences)
+.cursor/
