@@ -22,7 +22,7 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  PROJECT_NUMBER: 6
+  PROJECT_NUMBER: 7
   PROJECT_OWNER: alistairhendersoninfo
 
 jobs:
@@ -80,7 +80,7 @@ jobs:
           
           This issue was automatically created from GitHub Project task.
           
-          **Project**: [Dev-Docker Development Roadmap](https://github.com/users/${{ env.PROJECT_OWNER }}/projects/${{ env.PROJECT_NUMBER }})
+          **Project**: [Dev-Docker V2 Development Roadmap](https://github.com/users/${{ env.PROJECT_OWNER }}/projects/${{ env.PROJECT_NUMBER }})
           **Task**: $TITLE
           **Project Item ID**: ${{ steps.get_item.outputs.item_id }}
           

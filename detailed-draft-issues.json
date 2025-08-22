@@ -1,0 +1,80 @@
+{
+  "title": "Create n8n Automation Server Container",
+  "body": "Create an n8n automation server container to handle workflow automation for container deployment with webhook endpoints for external triggers and persistent storage for workflows.",
+  "status": "In Progress"
+}
+{
+  "title": "Implement base image + software selection architecture",
+  "body": "Base image + configurable tool installation during build process",
+  "status": "Todo"
+}
+{
+  "title": "Create comprehensive SUPPORTED software list",
+  "body": "Development tools, databases, web frameworks, etc. for installation on base images",
+  "status": "Todo"
+}
+{
+  "title": "Add interactive software selection menu during BUILD",
+  "body": "Choose which tools to install on base image during build process - not at launch",
+  "status": "Todo"
+}
+{
+  "title": "Enhanced Port Management System",
+  "body": "Configurable port ranges, port reservation system, advanced port mapping (UDP, port ranges), load balancer configuration",
+  "status": "Todo"
+}
+{
+  "title": "Volume and Storage Management System",
+  "body": "Automatic volume creation and mounting, shared volume management between services, volume backup strategies and automation",
+  "status": "Todo"
+}
+{
+  "title": "Custom Image Builder and Template System",
+  "body": "Interactive software stack selection during build, save custom image definitions as templates, share templates, version management for custom images",
+  "status": "Todo"
+}
+{
+  "title": "Monitoring and Health Checks System",
+  "body": "Built-in container health monitoring, resource usage tracking and alerts, performance metrics collection, automated health check configuration",
+  "status": "Todo"
+}
+{
+  "title": "Security Enhancements and Vulnerability Management",
+  "body": "Container vulnerability scanning, security policy enforcement, access control and authentication, compliance reporting, secrets management",
+  "status": "Todo"
+}
+{
+  "title": "Create Nginx Web Server Container",
+  "body": "Create an nginx web server container to host the container management web interface with reverse proxy to n8n API endpoints and responsive container selection form.",
+  "status": "No Status"
+}
+{
+  "title": "Create API Server Container for Container Management",
+  "body": "Create a dedicated API server container with RESTful endpoints for container management, DNS integration, Traefik configuration, and database storage for container inventory.",
+  "status": "No Status"
+}
+{
+  "title": "Design Container Management Database Schema",
+  "body": "Design and implement database schema for storing container configurations, status, DNS entries, ports, and deployment history. Choose between JSON files, SQLite, or PostgreSQL based on requirements.",
+  "status": "No Status"
+}
+{
+  "title": "Implement Automated DNS Management System",
+  "body": "Create automated system to manage DNS entries on both host DNS server and container DNS server when containers are deployed, including dynamic DNS updates and cleanup on container removal.",
+  "status": "No Status"
+}
+{
+  "title": "Integrate Traefik Dynamic Configuration",
+  "body": "Implement automated Traefik configuration management to automatically register new containers with proper routing, SSL certificates, and load balancing based on container deployment requests.",
+  "status": "No Status"
+}
+{
+  "title": "Build Container Reference Dashboard",
+  "body": "Create a comprehensive dashboard page showing all deployed containers with their DNS names, IP addresses, SSH port numbers, status, and management actions. Include search, filtering, and real-time updates.",
+  "status": "No Status"
+}
+{
+  "title": "Create PostgreSQL Database Container & Schema",
+  "body": "Create PostgreSQL container with comprehensive database schema for container metadata, DNS entries, port mappings, and deployment history. Includes tables for containers, dns_entries, container_ports, and deployment_history with proper relationships and indexes.",
+  "status": "No Status"
+}
