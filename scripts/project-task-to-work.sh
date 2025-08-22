@@ -20,19 +20,19 @@ NC='\033[0m' # No Color
 
 # Functions
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    echo -e "${BLUE}[INFO]${NC} $1" >&2
 }
 
 log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    echo -e "${GREEN}[SUCCESS]${NC} $1" >&2
 }
 
 log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    echo -e "${YELLOW}[WARNING]${NC} $1" >&2
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo -e "${RED}[ERROR]${NC} $1" >&2
 }
 
 # Check if gh CLI is installed and authenticated
@@ -375,6 +375,39 @@ This pull request implements the enhancement: \"$task_title\"
     echo "$pr_url"
 }
 
+# Check if an issue already exists for this task
+check_existing_issue() {
+    local task_title="$1"
+    
+    # Search for existing issues with similar title
+    local existing_issue
+    existing_issue=$(gh issue list --repo "$REPO_OWNER/$REPO_NAME" --search "in:title \"$task_title\"" --json number,title --jq '.[0] | select(.title != null)')
+    
+    if [ -n "$existing_issue" ] && [ "$existing_issue" != "null" ]; then
+        local issue_number
+        local issue_title
+        issue_number=$(echo "$existing_issue" | jq -r '.number')
+        issue_title=$(echo "$existing_issue" | jq -r '.title')
+        
+        log_warning "Found existing issue #$issue_number: $issue_title"
+        
+        # Check if there's already a feature branch
+        local branch_name="feature/issue-$issue_number-$(echo "$task_title" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')"
+        
+        if git show-ref --verify --quiet "refs/heads/$branch_name" || git show-ref --verify --quiet "refs/remotes/origin/$branch_name"; then
+            log_info "Feature branch already exists: $branch_name"
+            log_info "Use: git checkout $branch_name"
+            return 0
+        else
+            log_info "Issue exists but no feature branch found"
+            echo "$existing_issue"
+            return 1
+        fi
+    fi
+    
+    return 2  # No existing issue found
+}
+
 # Main function
 main() {
     echo "🚀 Project Task to Enhancement Workflow"
@@ -419,11 +452,31 @@ main() {
     log_info "Current status: $task_status"
     echo
     
-    # Confirm action
-    read -p "Create enhancement issue and branch for this task? (y/N): " confirm
-    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-        log_info "Operation cancelled"
+    # Check for existing issue
+    check_existing_issue "$task_title"
+    local existing_check_result=$?
+    
+    if [ $existing_check_result -eq 0 ]; then
+        # Issue and branch already exist
+        log_success "Task already has issue and feature branch set up!"
         exit 0
+    elif [ $existing_check_result -eq 1 ]; then
+        # Issue exists but no branch - ask if user wants to create branch
+        echo
+        read -p "Issue exists but no feature branch. Create feature branch? (y/N): " confirm
+        if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+            log_info "Operation cancelled"
+            exit 0
+        fi
+        # Continue with branch creation only
+    else
+        # No existing issue - continue with full workflow
+        echo
+        read -p "Create enhancement issue and branch for this task? (y/N): " confirm
+        if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+            log_info "Operation cancelled"
+            exit 0
+        fi
     fi
     
     echo
