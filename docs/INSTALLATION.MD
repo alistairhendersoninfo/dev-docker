@@ -168,40 +168,53 @@ chmod 600 ~/.aws/credentials
 chmod 600 ~/.aws/config
 ```
 
-### Update Traefik configuration with your email
-
-```bash
-sed -i 's/your-email@example.com/YOUR_EMAIL@example.com/' docker/traefik/traefik.yml
-```
-
-## Step 5: Build Base Images
-
-### Build the base development image
-
-```bash
-docker build -t dev-base:latest docker/base-image
-```
-
-### Build the Playwright image
-
-```bash
-docker build -t dev-playwright:latest docker/playwright-image
-```
-
-## Step 6: Configure DNS
+## Step 5: Configure DNS
 
 ### Update your DNS provider (Route53) with wildcard record
 
 Create an A record in Route53:
 
-- **Name**: `*.local.alistairhenderson.info`
+- **Name**: `*.local.YOUR_DOMAIN.com`
 - **Value**: Your server's public IP address
 - **TTL**: 300 seconds
+
+**Note**: Replace `YOUR_DOMAIN.com` with your actual domain name. The script will prompt you for this during setup.
 
 ### Verify DNS propagation
 
 ```bash
-nslookup test-local.alistairhenderson.info
+nslookup test-local.YOUR_DOMAIN.com
+```
+
+## Step 6: Build and Start Environment
+
+### Use the automated start script (Recommended)
+
+The easiest way to build and start everything is to use the provided start script:
+
+```bash
+./start.sh
+```
+
+This script will:
+- Pull latest changes from Git
+- Prompt you for your domain name and email
+- Build the Docker images you choose
+- Start all services automatically
+
+### Manual build process (Alternative)
+
+If you prefer to build manually:
+
+```bash
+# Build the base development image
+docker build -t dev-base:latest docker/base-image
+
+# Build the Playwright image  
+docker build -t dev-playwright:latest docker/playwright-image
+
+# Build the Traefik server
+docker build -t dev-traefik:latest docker/traefik
 ```
 
 ## Step 7: Start the Environment
@@ -242,8 +255,8 @@ ssh developer@localhost -p 2223
 
 ```bash
 # From inside a container
-nslookup project1-local.alistairhenderson.info
-nslookup project2-local.alistairhenderson.info
+nslookup project1-local.YOUR_DOMAIN.com
+nslookup project2-local.YOUR_DOMAIN.com
 ```
 
 ## Step 9: Base Image Hosting Options

@@ -163,6 +163,33 @@ case $build_choice in
     4)
         print_status "Building Traefik server..."
         
+        # Prompt for domain and email configuration
+        print_status "Configuring Traefik domain and email..."
+        
+        # Check if domain is already configured
+        if grep -q "alistairhenderson\.info" docker/traefik/traefik.yml || grep -q "YOUR_DOMAIN\.com" docker/traefik/traefik.yml; then
+            echo ""
+            read -p "Enter your domain name (e.g., example.com): " user_domain
+            if [[ -n "$user_domain" ]]; then
+                # Update domain in traefik.yml
+                sed -i "s/alistairhenderson\.info/$user_domain/g" docker/traefik/traefik.yml
+                sed -i "s/YOUR_DOMAIN\.com/$user_domain/g" docker/traefik/traefik.yml
+                
+                # Update domain in docker-compose.yml
+                sed -i "s/alistairhenderson\.info/$user_domain/g" docker/docker-compose.yml
+                sed -i "s/YOUR_DOMAIN\.com/$user_domain/g" docker/docker-compose.yml
+                
+                # Update domain in dnsmasq.conf
+                sed -i "s/alistairhenderson\.info/$user_domain/g" docker/dns/dnsmasq.conf
+                
+                print_success "Domain updated to: $user_domain"
+            else
+                print_warning "No domain provided, using default"
+            fi
+        else
+            print_success "Domain already configured"
+        fi
+        
         # Prompt for email and update Traefik config
         print_status "Configuring Traefik email address..."
         if grep -q "your-email@example.com" docker/traefik/traefik.yml; then
