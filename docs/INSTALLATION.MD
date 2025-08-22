@@ -188,12 +188,12 @@ nslookup test-local.YOUR_DOMAIN.com
 
 ## Step 6: Build and Start Environment
 
-### Use the automated start script (Recommended)
+### Use the automated build script (Recommended)
 
-The easiest way to build and start everything is to use the provided start script:
+The easiest way to build and start everything is to use the provided build script:
 
 ```bash
-./start.sh
+./Build-Docker-Images.sh
 ```
 
 This script will:

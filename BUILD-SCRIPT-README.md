@@ -128,7 +128,7 @@ docker compose -f docker/docker-compose.yml down
 
 ## Best Practices
 
-1. **Always use `./start.sh`** instead of manual commands
+1. **Always use `./Build-Docker-Images.sh`** instead of manual commands
 2. **Don't make local git changes** - they'll be overwritten
 3. **Run from project root** directory
 4. **Check output** for any warnings or errors
@@ -137,7 +137,7 @@ docker compose -f docker/docker-compose.yml down
 
 ## File Locations
 
-- **Start script**: `./start.sh` (project root)
+- **Build script**: `./Build-Docker-Images.sh` (project root)
 - **Minimal Dockerfile**: `docker/base-image/Dockerfile.minimal`
 - **Development Dockerfile**: `docker/base-image/Dockerfile`
 - **Playwright Dockerfile**: `docker/playwright-image/Dockerfile`

@@ -78,7 +78,7 @@ print_status "Checking git status and pulling latest changes..."
 # Check if there are uncommitted changes
 if [[ -n $(git status --porcelain) ]]; then
     print_warning "Local changes detected. Stashing them to pull latest..."
-    git stash push -m "Auto-stashed by start.sh $(date)"
+    git stash push -m "Auto-stashed by Build-Docker-Images.sh $(date)"
 fi
 
 # Fetch latest from remote
