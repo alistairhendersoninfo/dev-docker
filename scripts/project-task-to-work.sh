@@ -5,8 +5,8 @@
 
 set -e
 
-# Configuration
-PROJECT_NUMBER="6"
+# Configuration  
+PROJECT_NUMBER="7"
 PROJECT_OWNER="alistairhendersoninfo"
 REPO_OWNER="alistairhendersoninfo"
 REPO_NAME="dev-docker"
@@ -108,7 +108,7 @@ create_enhancement_issue() {
 
 This issue was automatically created from GitHub Project task.
 
-**Project**: [Dev-Docker Development Roadmap](https://github.com/users/$PROJECT_OWNER/projects/$PROJECT_NUMBER)
+**Project**: [Dev-Docker V2 Development Roadmap](https://github.com/users/$PROJECT_OWNER/projects/$PROJECT_NUMBER)
 **Task**: $task_title
 **Project Item ID**: $task_id
 
@@ -186,7 +186,7 @@ create_feature_branch() {
 
 **Issue**: #${issue_number}
 **Branch**: \`$branch_name\`
-**Project**: [Dev-Docker Development Roadmap](https://github.com/users/$PROJECT_OWNER/projects/$PROJECT_NUMBER)
+**Project**: [Dev-Docker V2 Development Roadmap](https://github.com/users/$PROJECT_OWNER/projects/$PROJECT_NUMBER)
 
 ## Overview
 
