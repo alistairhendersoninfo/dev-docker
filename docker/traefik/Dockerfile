@@ -2,6 +2,10 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Use Google DNS for better connectivity during build
+RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf && \
+    echo "nameserver 8.8.4.4" >> /etc/resolv.conf
+
 # Install essential packages for Traefik
 RUN apt-get update && apt-get install -y \
     ca-certificates \
