@@ -212,3 +212,12 @@ local-config/
 TODO.md
 *.todo
 roadmap.md
+
+# Terminal connection guide (contains SSH details)
+docs/TERMINAL-CONNECTION-GUIDE.md
+
+# Claude AI instructions (internal workflow)
+docs/CLAUDE-INSTRUCTIONS.md
+
+# Test files (internal verification)
+docs/TEST.md

@@ -15,15 +15,19 @@
 - Create new files
 - Use git commands (add, commit, push)
 - Provide information and explanations
+- **Connect to remote terminal via interactive session** (see TERMINAL-CONNECTION-GUIDE.md)
+- **Observe remote server activity** through terminal connection (read-only)
 
 ## What You CANNOT Do
 
 - Run terminal commands (except git)
-- Execute scripts
-- Build Docker images
-- Start/stop services
-- Test functionality
-- Access running containers
+- Execute scripts **directly on remote server**
+- Build Docker images **directly on remote server**
+- Start/stop services **directly on remote server**
+- Test functionality **directly on remote server**
+- Access running containers **directly**
+
+**Note**: You can observe all remote server activity through interactive terminal connection, but cannot execute commands directly.
 
 ## Project Structure
 

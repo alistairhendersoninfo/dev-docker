@@ -1,41 +1,39 @@
-# Project Container Creator - Development Roadmap
+# Development Docker Environment - Roadmap
 
 ## 🎯 Project Vision
 
-Transform Docker development workflow by providing an intelligent, automated system for creating and managing multiple project containers with zero configuration overhead.
+Transform Docker development workflow by providing a clean, automated system for building and launching development containers with zero configuration overhead.
 
-## 🚀 Current Status: Phase 1 Complete ✅
+## 🚀 Current Status: Core Architecture Complete ✅
 
 ### **What's Working Now:**
 
-- ✅ **Core Script**: Intelligent container creation with automatic resource management
-- ✅ **Port Management**: Automatic port allocation and conflict detection
-- ✅ **IP Assignment**: Dynamic IP allocation in network range
-- ✅ **Service Types**: Web, API, database, Redis, SSH support
-- ✅ **Traefik Integration**: Automatic HTTPS and domain routing
-- ✅ **Docker Compose**: Seamless integration with existing compose files
-- ✅ **Documentation**: Comprehensive README and examples
+- ✅ **Build System**: Separate image building with Build-Docker-Images.sh
+- ✅ **Launch System**: Container orchestration with Launch-Docker-Services.sh
+- ✅ **Base Images**: Minimal, Development, Playwright, Traefik, DNS images
+- ✅ **Persistent Configuration**: Local config system that survives git pulls
+- ✅ **Image Registry**: Tracking of built images (standard + custom)
+- ✅ **Singleton Services**: DNS/Traefik conflict detection and handling
+- ✅ **Service Integration**: Traefik reverse proxy with SSL automation
+- ✅ **Development Tools**: SSH access, project creation scripts
 
 ## 🗺️ Development Phases
 
-### **Phase 2: Enhanced Automation (Next 2-4 weeks)**
+### **Phase 2: Interactive Software Selection (Next)**
 
+#### **Build-Time Software Selection** 🔧
 
-#### **Software Selection Menu** 🔧
+- **Interactive Package Selection During Build**
+  - Development stack selection (Node.js, Python, Rust, Go, Java)
+  - Database tools (PostgreSQL, MySQL, MongoDB, Redis clients)
+  - Development tools (Git enhanced, Vim plugins, advanced editors)
+  - Web frameworks (React, Vue, Django, Express tools)
 
-- **Interactive Package Selection**
-  - Development stack selection (Node.js, Python, Rust, Go, Java, .NET)
-  - Database selection (PostgreSQL, MySQL, MongoDB, Redis, Elasticsearch)
-  - Web server selection (Nginx, Apache, Caddy, Traefik)
-  - Development tools selection (Git, Vim, VS Code, JetBrains IDEs)
-  - Monitoring tools selection (Prometheus, Grafana, ELK Stack)
-
-- **Package Templates**
-  - Full-stack web development template
-  - API-only microservice template
-  - Database template with admin tools
-  - Monitoring and observability template
-  - Custom template builder
+- **Custom Image Builder**
+  - User-defined software combinations
+  - Save custom image definitions
+  - Share custom image templates
+  - Version management for custom images
 
 #### **Enhanced Port Management** 🌐
 
@@ -203,19 +201,20 @@ Transform Docker development workflow by providing an intelligent, automated sys
 
 ## 🎯 Milestone Targets
 
-### **Q1 2024** 🎯
+### **2025 Q1** 🎯
 
-- [x] Core script functionality
-- [x] Basic port and IP management
-- [x] Service type support
-- [x] Documentation and examples
+- [x] Build/Launch separation architecture
+- [x] Base image system (minimal, dev, playwright, traefik, dns)
+- [x] Persistent configuration system
+- [x] Image registry and tracking
+- [x] Singleton service management
 
-### **Q2 2024** 🎯
+### **2025 Q2** 🎯
 
-- [ ] Software selection menu
-- [ ] Enhanced port management
-- [ ] Volume and storage management
-- [ ] Environment configuration
+- [ ] Interactive software selection during build
+- [ ] Custom image builder and templates
+- [ ] Enhanced storage and volume management
+- [ ] Advanced networking features
 
 ### **Q3 2024** 🎯
 
