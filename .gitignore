@@ -45,6 +45,7 @@ id_rsa
 *.pem
 *.ppk
 !id_rsa.pub
+.dev_docker
 
 # AWS credentials
 .aws/
