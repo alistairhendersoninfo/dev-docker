@@ -67,17 +67,19 @@ RUN set -eux; \
     dpkg -i /tmp/ripgrep.deb; \
     rm -f /tmp/ripgrep.deb; \
     # Install fd-find (fast find replacement for AI debugging)
-    wget -qO /tmp/fd.deb "https://github.com/sharkdp/fd/releases/download/v9.0.0/fd_9.0.0_amd64.deb"; \
+    wget -qO /tmp/fd.deb "https://github.com/sharkdp/fd/releases/download/v10.2.0/fd-musl_10.2.0_amd64.deb"; \
     dpkg -i /tmp/fd.deb; \
     rm -f /tmp/fd.deb; \
     # Install bat (better cat with syntax highlighting for AI debugging)
-    wget -qO /tmp/bat.deb "https://github.com/sharkdp/bat/releases/download/v0.24.0/bat_0.24.0_amd64.deb"; \
+    wget -qO /tmp/bat.deb "https://github.com/sharkdp/bat/releases/download/v0.25.0/bat-musl_0.25.0_musl-linux-amd64.deb"; \
     dpkg -i /tmp/bat.deb; \
     rm -f /tmp/bat.deb; \
-    # Install exa (better ls replacement for AI debugging)
-    wget -qO /tmp/exa.deb "https://github.com/ogham/exa/releases/download/v0.10.1/exa_0.10.1_amd64.deb"; \
-    dpkg -i /tmp/exa.deb; \
-    rm -f /tmp/exa.deb; \
+    # Install exa (better ls replacement for AI debugging) - extract from zip
+    wget -qO /tmp/exa.zip "https://github.com/ogham/exa/releases/download/v0.10.1/exa-linux-x86_64-v0.10.1.zip"; \
+    unzip -j /tmp/exa.zip "bin/exa" -d /tmp/; \
+    mv /tmp/exa /usr/local/bin/exa; \
+    chmod +x /usr/local/bin/exa; \
+    rm -f /tmp/exa.zip; \
     # Clean up any remaining temp files and apt cache
     rm -rf /tmp/* /var/lib/apt/lists/* /var/cache/apt/archives/*
 
