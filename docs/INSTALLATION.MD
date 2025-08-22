@@ -186,7 +186,136 @@ Create an A record in Route53:
 nslookup test.local.YOUR_DOMAIN
 ```
 
-## Step 6: Build and Start Environment
+## Step 6: Install Host DNS Server
+
+### Install dnsmasq on the host server
+
+Install dnsmasq directly on the host server (not in a container) to provide DNS resolution for external clients:
+
+```bash
+sudo apt update
+sudo apt install -y dnsmasq
+```
+
+### Configure dnsmasq
+
+Create the dnsmasq configuration file:
+
+```bash
+sudo tee /etc/dnsmasq.conf > /dev/null << EOF
+# Basic DNS configuration
+port=53
+domain-needed
+bogus-priv
+strict-order
+
+# Listen on all interfaces for external clients
+listen-address=0.0.0.0
+bind-interfaces
+
+# DNS entries for development containers
+# Replace YOUR_DOMAIN with your actual domain name
+address=/project1-local.YOUR_DOMAIN/192.168.69.23
+address=/project2-local.YOUR_DOMAIN/192.168.69.23
+address=/playwright-local.YOUR_DOMAIN/192.168.69.23
+address=/base-image-local.YOUR_DOMAIN/192.168.69.23
+
+# Internal Docker network resolution
+address=/.docker/127.0.0.11
+
+# Upstream DNS servers
+server=8.8.8.8
+server=8.8.4.4
+EOF
+```
+
+**Note**: Replace `YOUR_DOMAIN` with your actual domain (e.g., `alistairhenderson.info`) and `192.168.69.23` with your server's IP address.
+
+### Handle systemd-resolved conflicts
+
+Disable systemd-resolved's DNS binding to avoid port conflicts:
+
+```bash
+# Stop systemd-resolved from binding to port 53
+sudo systemctl stop systemd-resolved
+sudo systemctl disable systemd-resolved
+
+# Create a new resolv.conf
+sudo rm /etc/resolv.conf
+sudo tee /etc/resolv.conf > /dev/null << EOF
+nameserver 127.0.0.1
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+EOF
+
+# Make it immutable to prevent overwrites
+sudo chattr +i /etc/resolv.conf
+```
+
+### Start and enable dnsmasq
+
+```bash
+sudo systemctl enable dnsmasq
+sudo systemctl start dnsmasq
+sudo systemctl status dnsmasq
+```
+
+### Configure firewall for DNS
+
+Open DNS port for external clients:
+
+```bash
+# Allow DNS queries from external clients
+sudo ufw allow 53/udp
+sudo ufw allow 53/tcp
+
+# Allow SSH access to development containers
+sudo ufw allow 2221:2299/tcp
+```
+
+### Test DNS resolution
+
+```bash
+# Test DNS from the host
+nslookup project1-local.YOUR_DOMAIN 127.0.0.1
+
+# Test from external client (replace with actual domain)
+nslookup project1-local.YOUR_DOMAIN YOUR_SERVER_IP
+```
+
+### Client DNS Configuration
+
+To use this DNS server from external clients:
+
+**Option A: Network-wide (Router/DHCP)**
+- Set your router's DNS server to `YOUR_SERVER_IP`
+- All network clients will automatically use the development DNS
+
+**Option B: Individual client configuration**
+```bash
+# Linux/macOS - Add to /etc/resolv.conf (temporarily)
+nameserver YOUR_SERVER_IP
+nameserver 8.8.8.8
+
+# Windows - Add to network adapter DNS settings
+# Primary DNS: YOUR_SERVER_IP
+# Secondary DNS: 8.8.8.8
+```
+
+**Option C: SSH Config (recommended for development)**
+```bash
+# Add to ~/.ssh/config on your local machine
+Host *.local.YOUR_DOMAIN
+    User developer
+    IdentityFile ~/.ssh/dev_docker
+    
+# Usage examples:
+# ssh project1-local.YOUR_DOMAIN -p 2221
+# ssh project2-local.YOUR_DOMAIN -p 2222
+# ssh playwright-local.YOUR_DOMAIN -p 2223
+```
+
+## Step 7: Build and Start Environment
 
 ### Use the automated build script (Recommended)
 
@@ -217,7 +346,7 @@ docker build -t dev-playwright:latest docker/playwright-image
 docker build -t dev-traefik:latest docker/traefik
 ```
 
-## Step 7: Start the Environment
+## Step 8: Start the Environment
 
 ### Bring up all services
 
@@ -232,7 +361,7 @@ docker compose -f docker/docker-compose.yml ps
 docker compose -f docker/docker-compose.yml logs -f
 ```
 
-## Step 8: Verify Installation
+## Step 9: Verify Installation
 
 ### Check Traefik dashboard
 
@@ -259,7 +388,7 @@ nslookup project1-local.YOUR_DOMAIN.com
 nslookup project2-local.YOUR_DOMAIN.com
 ```
 
-## Step 9: Base Image Hosting Options
+## Step 10: Base Image Hosting Options
 
 ### Option A: GitHub Container Registry (Free, Recommended)
 
