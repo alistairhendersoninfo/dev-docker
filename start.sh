@@ -33,10 +33,24 @@ print_error() {
 }
 
 # Check if we're in the right directory
-if [[ ! -f "docker/docker-compose.yml" ]]; then
-    print_error "Please run this script from the project root directory (where docker-compose.yml is located)"
+COMPOSE_FILE=""
+if [[ -f "docker/docker-compose.yml" ]]; then
+    COMPOSE_FILE="docker/docker-compose.yml"
+elif [[ -f "docker-compose.yml" ]]; then
+    COMPOSE_FILE="docker-compose.yml"
+else
+    print_error "Please run this script from the project root directory"
+    print_error "Expected to find either:"
+    print_error "  - docker/docker-compose.yml (current structure)"
+    print_error "  - docker-compose.yml (alternative structure)"
+    print_error ""
+    print_error "Current directory: $(pwd)"
+    print_error "Files in current directory:"
+    ls -la | head -10
     exit 1
 fi
+
+print_success "Found docker-compose file: $COMPOSE_FILE"
 
 # Check if Docker is installed
 if ! command -v docker &> /dev/null; then
@@ -124,14 +138,14 @@ fi
 
 # Start services
 print_status "Starting all services..."
-docker compose -f docker/docker-compose.yml up -d
+docker compose -f "$COMPOSE_FILE" up -d
 
 # Wait a moment for services to start
 sleep 3
 
 # Check service status
 print_status "Checking service status..."
-docker compose -f docker/docker-compose.yml ps
+docker compose -f "$COMPOSE_FILE" ps
 
 print_success "All services started successfully!"
 echo ""
@@ -148,5 +162,5 @@ echo "   ssh developer@localhost -p 2221  # Project1"
 echo "   ssh developer@localhost -p 2222  # Project2"
 echo "   ssh developer@localhost -p 2223  # Playwright"
 echo ""
-echo "📊 View logs: docker compose -f docker/docker-compose.yml logs -f"
-echo "🛑 Stop services: docker compose -f docker/docker-compose.yml down"
+echo "📊 View logs: docker compose -f \"$COMPOSE_FILE\" logs -f"
+echo "🛑 Stop services: docker compose -f \"$COMPOSE_FILE\" down"
