@@ -60,22 +60,22 @@ RUN apt-get update && apt-get install -y \
 RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 && \
     chmod a+x /usr/local/bin/yq
 
-# Install modern CLI tools manually with hardcoded versions for reliability
+# Install modern CLI tools manually using latest URLs (auto-redirect to correct versions)
 RUN set -eux; \
     # Install ripgrep (latest stable)
-    wget -qO /tmp/ripgrep.deb "https://github.com/BurntSushi/ripgrep/releases/latest/download/ripgrep_14.1.1-1_amd64.deb"; \
+    wget -qO /tmp/ripgrep.deb "https://github.com/BurntSushi/ripgrep/releases/latest/download/ripgrep_amd64.deb"; \
     dpkg -i /tmp/ripgrep.deb; \
     rm -f /tmp/ripgrep.deb; \
     # Install fd-find (latest stable)
-    wget -qO /tmp/fd.deb "https://github.com/sharkdp/fd/releases/latest/download/fd_9.0.0_amd64.deb"; \
+    wget -qO /tmp/fd.deb "https://github.com/sharkdp/fd/releases/latest/download/fd_amd64.deb"; \
     dpkg -i /tmp/fd.deb; \
     rm -f /tmp/fd.deb; \
     # Install bat (latest stable)
-    wget -qO /tmp/bat.deb "https://github.com/sharkdp/bat/releases/latest/download/bat_0.24.0_amd64.deb"; \
+    wget -qO /tmp/bat.deb "https://github.com/sharkdp/bat/releases/latest/download/bat_amd64.deb"; \
     dpkg -i /tmp/bat.deb; \
     rm -f /tmp/bat.deb; \
     # Install exa (latest stable)
-    wget -qO /tmp/exa.deb "https://github.com/ogham/exa/releases/latest/download/exa_0.10.1_amd64.deb"; \
+    wget -qO /tmp/exa.deb "https://github.com/ogham/exa/releases/latest/download/exa_amd64.deb"; \
     dpkg -i /tmp/exa.deb; \
     rm -f /tmp/exa.deb; \
     # Clean up any remaining temp files and apt cache
