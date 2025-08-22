@@ -54,5 +54,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
 # Set working directory
 WORKDIR /home/node
 
-# Start n8n with proper configuration
-CMD ["n8n"]
+# Use the original n8n entrypoint and command
+# The base image uses: ENTRYPOINT ["tini", "--", "/docker-entrypoint.sh"]
+# We don't need to override this, just let it use the default
