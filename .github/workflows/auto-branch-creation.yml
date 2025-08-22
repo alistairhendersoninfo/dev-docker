@@ -1,0 +1,95 @@
+name: Auto Branch Creation from Project Tasks
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'  # Check every 10 minutes
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  check-and-create-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup GitHub CLI
+        run: |
+          gh auth status
+
+      - name: Check for In Progress tasks and create branches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔍 Checking GitHub Project for 'In Progress' tasks..."
+          
+          # Get project items that are in progress
+          PROJECT_ITEMS=$(gh project item-list 6 --owner alistairhendersoninfo --format json)
+          
+          echo "$PROJECT_ITEMS" | jq -r '.items[] | select(.status.name == "In Progress") | {title: .content.title, id: .id}' | while IFS= read -r item; do
+            if [ -n "$item" ] && [ "$item" != "null" ]; then
+              TASK_TITLE=$(echo "$item" | jq -r '.title')
+              TASK_ID=$(echo "$item" | jq -r '.id')
+              
+              # Convert title to branch name (lowercase, replace spaces with hyphens)
+              BRANCH_NAME="feature/$(echo "$TASK_TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')"
+              
+              echo "📋 Found In Progress task: $TASK_TITLE"
+              echo "🌿 Branch name would be: $BRANCH_NAME"
+              
+              # Check if branch already exists
+              if git show-ref --verify --quiet refs/heads/$BRANCH_NAME; then
+                echo "✅ Branch $BRANCH_NAME already exists"
+              else
+                echo "🚀 Creating new branch: $BRANCH_NAME"
+                
+                # Create and push new branch
+                git checkout -b $BRANCH_NAME
+                git push origin $BRANCH_NAME
+                
+                # Create a commit to initialize the branch with task info
+                echo "# Task: $TASK_TITLE
+
+## GitHub Project Task
+- **Task ID**: $TASK_ID  
+- **Status**: In Progress
+- **Project**: https://github.com/users/alistairhendersoninfo/projects/6
+
+## Implementation Notes
+This branch was automatically created when the task was moved to 'In Progress'.
+
+### Next Steps:
+1. Implement the required functionality
+2. Test the changes locally
+3. Create a Pull Request when ready
+4. Link the PR to this task
+
+### Task Details:
+$TASK_TITLE
+" > TASK_INFO.md
+                
+                git add TASK_INFO.md
+                git commit -m "Initialize branch for task: $TASK_TITLE
+
+Auto-created branch from GitHub Project task movement.
+Task ID: $TASK_ID
+Project: https://github.com/users/alistairhendersoninfo/projects/6"
+                
+                git push origin $BRANCH_NAME
+                
+                echo "✅ Branch $BRANCH_NAME created and pushed"
+                
+                # Switch back to main
+                git checkout main
+              fi
+            fi
+          done
+
+      - name: Notify about created branches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🎉 Auto-branch creation workflow completed"
+          echo "📊 Check the repository for any new feature branches"
