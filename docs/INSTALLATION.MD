@@ -174,16 +174,16 @@ chmod 600 ~/.aws/config
 
 Create an A record in Route53:
 
-- **Name**: `*.local.YOUR_DOMAIN.com`
+- **Name**: `*.local.YOUR_DOMAIN`
 - **Value**: Your server's public IP address
 - **TTL**: 300 seconds
 
-**Note**: Replace `YOUR_DOMAIN.com` with your actual domain name. The script will prompt you for this during setup.
+**Note**: Replace `YOUR_DOMAIN` with your actual domain name. The script will prompt you for this during setup.
 
 ### Verify DNS propagation
 
 ```bash
-nslookup test-local.YOUR_DOMAIN.com
+nslookup test.local.YOUR_DOMAIN
 ```
 
 ## Step 6: Build and Start Environment

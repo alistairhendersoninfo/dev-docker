@@ -27,8 +27,8 @@ RUN mkdir -p /etc/traefik /var/log/traefik /var/lib/traefik
 RUN chown -R traefik:traefik /etc/traefik /var/log/traefik /var/lib/traefik
 
 # Copy configuration files
-COPY ../../traefik/traefik.yml /etc/traefik/
-COPY ../../traefik/acme.json /var/lib/traefik/
+COPY traefik.yml /etc/traefik/
+COPY acme.json /var/lib/traefik/
 
 # Set permissions
 RUN chmod 600 /var/lib/traefik/acme.json
