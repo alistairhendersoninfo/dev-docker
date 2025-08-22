@@ -104,6 +104,21 @@ git clean -fd
 
 print_success "Git repository is now clean and up-to-date"
 
+# Prompt for email and update Traefik config
+print_status "Configuring Traefik email address..."
+if grep -q "your-email@example.com" docker/traefik/traefik.yml; then
+    echo ""
+    read -p "Enter your email address for Let's Encrypt SSL certificates: " user_email
+    if [[ -n "$user_email" ]]; then
+        sed -i "s/your-email@example.com/$user_email/g" docker/traefik/traefik.yml
+        print_success "Traefik email updated to: $user_email"
+    else
+        print_warning "No email provided, using default placeholder"
+    fi
+else
+    print_success "Traefik email already configured"
+fi
+
 # Build images if they don't exist or if forced rebuild
 print_status "Checking Docker images..."
 
