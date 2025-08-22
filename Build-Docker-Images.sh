@@ -113,13 +113,14 @@ echo "Which images would you like to build?"
 echo "1) Minimal image only (bare shell with VIM - fastest)"
 echo "2) Development image only (full tools - Cursor, OpenCode, Claude CLIs)"
 echo "3) Playwright image only (browser automation)"
-echo "4) All images (minimal + development + playwright - recommended)"
-echo "5) Traefik configuration"
-echo "6) Skip building (use existing images)"
-echo "7) Exit"
+echo "4) All development images (minimal + development + playwright)"
+echo "5) Configure Traefik and DNS"
+echo "6) Build everything and configure (recommended for first setup)"
+echo "7) Skip building (use existing images)"
+echo "8) Exit"
 echo ""
 
-read -p "Enter your choice (1-7): " build_choice
+read -p "Enter your choice (1-8): " build_choice
 
 case $build_choice in
     1)
@@ -225,17 +226,77 @@ case $build_choice in
             print_success "Traefik email already configured"
         fi
         
-        print_success "Traefik configuration updated - using official image from docker-compose.yml"
+        print_success "Traefik and DNS configuration updated"
         ;;
     6)
-        print_status "Skipping image builds - using existing images"
+        print_status "Building everything and configuring (complete setup)..."
+        
+        # Build all images
+        if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
+            print_status "Building minimal image..."
+            docker build -t dev-minimal:latest -f docker/base-image/Dockerfile.minimal docker/base-image
+            print_success "Minimal image built successfully"
+        else
+            print_success "Minimal image already exists"
+        fi
+        
+        if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
+            print_status "Building development base image..."
+            docker build -t dev-base:latest docker/base-image
+            print_success "Development base image built successfully"
+        else
+            print_success "Development base image already exists"
+        fi
+        
+        if [[ "$(docker images -q dev-playwright:latest 2> /dev/null)" == "" ]]; then
+            print_status "Building Playwright image..."
+            docker build -t dev-playwright:latest docker/playwright-image
+            print_success "Playwright image built successfully"
+        else
+            print_success "Playwright image already exists"
+        fi
+        
+        # Configure Traefik and DNS
+        print_status "Configuring Traefik domain and email..."
+        if grep -q "alistairhenderson\.info" docker/docker-compose.yml || grep -q "alistairhenderson\.info" docker/dns/dnsmasq.conf || grep -q "YOUR_DOMAIN\.com" docker/docker-compose.yml; then
+            echo ""
+            read -p "Enter your domain name (e.g., example.com): " user_domain
+            if [[ -n "$user_domain" ]]; then
+                sed -i "s/alistairhenderson\.info/$user_domain/g" docker/docker-compose.yml
+                sed -i "s/YOUR_DOMAIN\.com/$user_domain/g" docker/docker-compose.yml
+                sed -i "s/alistairhenderson\.info/$user_domain/g" docker/dns/dnsmasq.conf
+                print_success "Domain updated to: $user_domain"
+            else
+                print_warning "No domain provided, using default"
+            fi
+        else
+            print_success "Domain already configured"
+        fi
+        
+        if grep -q "your-email@example.com" docker/traefik/traefik.yml; then
+            echo ""
+            read -p "Enter your email address for Let's Encrypt SSL certificates: " user_email
+            if [[ -n "$user_email" ]]; then
+                sed -i "s/your-email@example.com/$user_email/g" docker/traefik/traefik.yml
+                print_success "Traefik email updated to: $user_email"
+            else
+                print_warning "No email provided, using default placeholder"
+            fi
+        else
+            print_success "Traefik email already configured"
+        fi
+        
+        print_success "Complete setup finished - all images built and configured!"
         ;;
     7)
+        print_status "Skipping image builds - using existing images"
+        ;;
+    8)
         print_status "Exiting..."
         exit 0
         ;;
     *)
-        print_error "Invalid choice. Defaulting to building all images..."
+        print_error "Invalid choice. Defaulting to complete setup..."
         # Default to building both
         if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
             docker build -t dev-minimal:latest -f docker/base-image/Dockerfile.minimal docker/base-image
