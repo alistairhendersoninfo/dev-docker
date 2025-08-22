@@ -246,8 +246,16 @@ EOF
 Create DNS entries for all container services that point to the host IP address:
 
 ```bash
-# Replace 192.168.68.23 with your actual host IP address
-HOST_IP="192.168.68.23"
+# Automatically detect the host IP address
+HOST_IP=$(ip route get 1.1.1.1 | awk '{print $7; exit}')
+echo "Detected host IP: $HOST_IP"
+
+# Verify the detected IP is correct
+echo "Please verify this is your correct host IP address:"
+ip a | grep -E "inet [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | grep -v "127.0.0.1" | head -5
+
+# If the auto-detected IP is wrong, manually set it:
+# HOST_IP="YOUR_ACTUAL_IP_ADDRESS"
 
 sudo tee /etc/dnsmasq.d/container-services.conf > /dev/null << EOF
 # Container service DNS entries (pointing to host IP for external access)
@@ -263,9 +271,11 @@ address=/api.alistairhenderson.info/$HOST_IP
 # Local development domains (for container-to-container communication)
 address=/.local.alistairhenderson.info/172.20.0.3
 EOF
+
+echo "DNS entries created with host IP: $HOST_IP"
 ```
 
-**Note**: Replace `192.168.68.23` with your actual host server IP address. These entries allow external clients to access the containerized services through the host.
+**Note**: The script automatically detects your host IP address using the default route. If the detected IP is incorrect, you can manually set the `HOST_IP` variable before running the configuration commands.
 
 ### Restart dnsmasq to load new configuration
 
