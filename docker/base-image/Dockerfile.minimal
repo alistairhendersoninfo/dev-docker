@@ -1,0 +1,40 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install only the absolute essentials
+RUN apt-get update && apt-get install -y \
+    openssh-server \
+    sudo \
+    vim \
+    curl \
+    git \
+    ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+# Create developer user and add to sudo group
+RUN useradd -m -s /bin/bash -G sudo developer
+
+# Create SSH directory and set permissions
+RUN mkdir -p /home/developer/.ssh && \
+    chown developer:developer /home/developer/.ssh && \
+    chmod 700 /home/developer/.ssh
+
+# Create authorized_keys file (will be populated at runtime via volume mount)
+RUN touch /home/developer/.ssh/authorized_keys && \
+    chown developer:developer /home/developer/.ssh/authorized_keys && \
+    chmod 600 /home/developer/.ssh/authorized_keys
+
+# Configure SSH
+RUN mkdir /var/run/sshd && \
+    echo 'PasswordAuthentication no' >> /etc/ssh/sshd_config && \
+    echo 'PubkeyAuthentication yes' >> /etc/ssh/sshd_config && \
+    echo 'AuthorizedKeysFile .ssh/authorized_keys' >> /etc/ssh/sshd_config
+
+# Set default shell to bash for developer user
+RUN chsh -s /bin/bash developer
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D"]
