@@ -166,15 +166,11 @@ case $build_choice in
         # Prompt for domain and email configuration
         print_status "Configuring Traefik domain and email..."
         
-        # Check if domain is already configured
-        if grep -q "alistairhenderson\.info" docker/traefik/traefik.yml || grep -q "YOUR_DOMAIN\.com" docker/traefik/traefik.yml; then
+        # Check if domain is already configured (check multiple files)
+        if grep -q "alistairhenderson\.info" docker/docker-compose.yml || grep -q "alistairhenderson\.info" docker/dns/dnsmasq.conf || grep -q "YOUR_DOMAIN\.com" docker/docker-compose.yml; then
             echo ""
             read -p "Enter your domain name (e.g., example.com): " user_domain
             if [[ -n "$user_domain" ]]; then
-                # Update domain in traefik.yml
-                sed -i "s/alistairhenderson\.info/$user_domain/g" docker/traefik/traefik.yml
-                sed -i "s/YOUR_DOMAIN\.com/$user_domain/g" docker/traefik/traefik.yml
-                
                 # Update domain in docker-compose.yml
                 sed -i "s/alistairhenderson\.info/$user_domain/g" docker/docker-compose.yml
                 sed -i "s/YOUR_DOMAIN\.com/$user_domain/g" docker/docker-compose.yml
@@ -206,7 +202,7 @@ case $build_choice in
         fi
         
         if [[ "$(docker images -q dev-traefik:latest 2> /dev/null)" == "" ]]; then
-            docker build -t dev-traefik:latest traefik
+            docker build -t dev-traefik:latest docker/traefik
             print_success "Traefik server built successfully"
         else
             print_success "Traefik server already exists"
