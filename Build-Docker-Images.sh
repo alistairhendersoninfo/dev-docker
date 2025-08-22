@@ -10,8 +10,9 @@
 #   3 - Playwright base image (browser automation)
 #   4 - Traefik base image (reverse proxy)
 #   5 - DNS base image (local DNS server)
-#   6 - All standard images
-#   7 - Exit
+#   6 - n8n automation server (workflow automation)
+#   7 - All standard images
+#   8 - Exit
 #   --help - Show this help message
 #
 # Examples:
@@ -33,8 +34,9 @@ if [[ "$1" == "--help" || "$1" == "-h" ]]; then
     echo "  3 - Playwright base image (browser automation)"
     echo "  4 - Traefik base image (reverse proxy)"
     echo "  5 - DNS base image (local DNS server)"
-    echo "  6 - All standard images"
-    echo "  7 - Exit"
+    echo "  6 - n8n automation server (workflow automation)"
+    echo "  7 - All standard images"
+    echo "  8 - Exit"
     echo "  --help, -h - Show this help message"
     echo ""
     echo "Examples:"
@@ -118,6 +120,12 @@ create_local_config() {
       "description": "Local DNS server",
       "built": false,
       "dockerfile": "docker/dns/Dockerfile"
+    },
+    "n8n": {
+      "name": "dev-n8n:latest",
+      "description": "n8n automation server",
+      "built": false,
+      "dockerfile": "docker/n8n/Dockerfile"
     }
   },
   "custom": {}
@@ -223,11 +231,12 @@ main() {
         echo "3) Playwright base image (browser automation)"
         echo "4) Traefik base image (reverse proxy)"
         echo "5) DNS base image (local DNS server)"
-        echo "6) All standard images"
-        echo "7) Exit"
+        echo "6) n8n automation server (workflow automation)"
+        echo "7) All standard images"
+        echo "8) Exit"
         echo ""
         
-        read -p "Enter your choice (1-7): " build_choice
+        read -p "Enter your choice (1-8): " build_choice
     fi
     
     case $build_choice in
@@ -252,20 +261,24 @@ main() {
             build_image "dns" "dev-dns:latest" "docker/dns/Dockerfile" "DNS base image"
             ;;
         6)
+            build_image "n8n" "dev-n8n:latest" "docker/n8n/Dockerfile" "n8n automation server"
+            ;;
+        7)
             print_status "Building all standard images..."
             build_image "minimal" "dev-minimal:latest" "docker/base-image/Dockerfile.minimal" "Minimal base image"
             build_image "development" "dev-base:latest" "docker/base-image/Dockerfile" "Development base image"
             build_image "playwright" "dev-playwright:latest" "docker/playwright-image/Dockerfile" "Playwright base image"
             build_image "traefik" "dev-traefik:latest" "docker/traefik/Dockerfile" "Traefik base image"
             build_image "dns" "dev-dns:latest" "docker/dns/Dockerfile" "DNS base image"
+            build_image "n8n" "dev-n8n:latest" "docker/n8n/Dockerfile" "n8n automation server"
             print_success "All standard images built successfully!"
             ;;
-        7)
+        8)
             print_status "Exiting..."
             exit 0
             ;;
         *)
-            print_error "Invalid choice. Please select 1-7."
+            print_error "Invalid choice. Please select 1-8."
             exit 1
             ;;
     esac

@@ -1,192 +1,117 @@
-# Enhancement: Create n8n Automation Server Container
-
-**Issue**: [#13](https://github.com/alistairhendersoninfo/dev-docker/issues/13)
-**Branch**: `feature/issue-13-create-n8n-automation-server`
-**Project**: [Dev-Docker Development Roadmap](https://github.com/users/alistairhendersoninfo/projects/6)
+# Issue #13: Create n8n Automation Server Container
 
 ## Overview
 
-This directory contains work for creating an n8n automation server container to handle workflow automation for container deployment with webhook endpoints for external triggers and persistent storage for workflows.
+This issue implements an n8n automation server container for workflow automation in the dev-docker environment. The n8n server will handle container deployment automation, DNS management, and integration with the existing infrastructure.
 
-## Implementation Progress
+## Implementation Status
 
-- [ ] Requirements analysis completed
-- [ ] Docker container architecture defined
-- [ ] n8n Dockerfile created
-- [ ] Docker volume configuration implemented
-- [ ] Webhook endpoints configured
-- [ ] Basic container workflows created
-- [ ] Integration with Build-Docker-Images.sh
-- [ ] DNS configuration setup
-- [ ] Integration testing completed
-- [ ] Documentation updated
-- [ ] Ready for code review
+### ✅ Completed
+- [x] Created n8n Dockerfile with proper dependencies
+- [x] Created docker-compose configuration with PostgreSQL backend
+- [x] Set up persistent volumes for workflows and data
+- [x] Created basic container deployment workflow template
+- [x] Added n8n to Build-Docker-Images.sh menu (option 6)
+- [x] Created database initialization scripts
+- [x] Configured Traefik integration for web interface
 
-## Files and Structure
+### 🔄 In Progress
+- [ ] Configure DNS entry for n8n web interface access
+- [ ] Test n8n workflow execution and API endpoints
+- [ ] Create additional workflow templates
 
+### 📋 Pending
+- [ ] Set up webhook endpoints for container deployment triggers
+- [ ] Create comprehensive documentation and setup guides
+
+## Architecture
+
+### Components
+1. **n8n Server**: Main automation engine
+2. **PostgreSQL Database**: Workflow and execution data storage
+3. **Traefik Integration**: Reverse proxy and SSL termination
+4. **Docker Socket Access**: Container management capabilities
+5. **SSH Key Access**: Remote server management
+
+### Network Configuration
+- **Web Interface**: `http://n8n-local.alistairhenderson.info:5678`
+- **Webhook Endpoints**: `http://n8n-local.alistairhenderson.info:5678/webhook/*`
+- **Database**: Internal PostgreSQL on n8n-network
+- **Traefik**: Connected to traefik-network
+
+## Files Created
+
+### Docker Configuration
+- `docker/n8n/Dockerfile` - n8n container definition
+- `docker/n8n/docker-compose.yml` - Complete service stack
+- `docker/n8n/init-db/01-init-n8n.sql` - Database schema
+
+### Workflows
+- `docker/n8n/workflows/container-deployment-workflow.json` - Basic deployment automation
+
+### Build Integration
+- Updated `Build-Docker-Images.sh` with n8n option (6)
+
+## Phase 2: High Availability Planning
+
+### Planned HA Features
+- **n8n Clustering**: Multiple n8n instances with load balancing
+- **Database HA**: PostgreSQL replication and failover
+- **Monitoring**: Comprehensive health checks and alerting
+- **Backup & Recovery**: Automated backup and disaster recovery
+- **Chaos Testing**: Tools for testing HA resilience
+
+### HA Architecture Components
+- Load balancer (HAProxy or Nginx)
+- Multiple n8n worker nodes
+- PostgreSQL primary/replica setup
+- Shared storage for workflows
+- Monitoring stack (Prometheus, Grafana)
+- Backup automation (pg_dump, volume snapshots)
+
+## Usage
+
+### Building the Image
+```bash
+./Build-Docker-Images.sh 6  # Build n8n automation server
 ```
-work/issue-13/
-├── README.md                    # This file - progress tracking
-├── implementation/
-│   ├── docker/
-│   │   └── n8n/
-│   │       ├── Dockerfile       # n8n container definition
-│   │       ├── docker-compose.yml  # Service configuration
-│   │       └── config/          # n8n configuration files
-│   ├── workflows/               # n8n workflow definitions
-│   │   ├── container-deployment.json
-│   │   ├── dns-management.json
-│   │   └── traefik-config.json
-│   └── scripts/
-│       ├── setup-n8n.sh        # Setup and initialization
-│       └── test-webhooks.sh     # Webhook testing
-├── tests/
-│   ├── test-n8n-deployment.sh  # Container deployment tests
-│   ├── test-webhook-api.py     # Webhook endpoint tests
-│   └── integration/             # Integration test suites
-├── docs/
-│   ├── n8n-setup-guide.md      # Setup and configuration guide
-│   ├── workflow-documentation.md # Workflow explanations
-│   ├── webhook-api.md           # API documentation
-│   └── integration-guide.md    # Integration with existing system
-└── notes/
-    ├── technical-decisions.md   # Architecture and design decisions
-    ├── integration-points.md    # Integration considerations
-    └── performance-notes.md     # Performance and optimization notes
+
+### Starting the Service
+```bash
+cd docker/n8n
+docker-compose up -d
 ```
 
-## Technical Requirements
+### Accessing the Interface
+- Web UI: `http://n8n-local.alistairhenderson.info:5678`
+- API: `http://n8n-local.alistairhenderson.info:5678/api/v1/`
 
-### Docker Container Setup
-- **Base Image**: Official n8n Docker image
-- **Configuration**: Development environment optimized
-- **Volumes**: Persistent storage for workflows and data
-- **Networking**: Expose web interface (5678) and webhook ports
-- **Environment**: Development-friendly configuration
+## Integration Points
 
-### Integration Points
-- **Docker API**: Container management operations
-- **DNS Management**: Both host and container DNS integration
-- **Traefik**: Reverse proxy configuration and SSL
-- **PostgreSQL**: Database connectivity for workflow data
-- **Build System**: Integration with Build-Docker-Images.sh
+### Container Management
+- Docker API access via mounted socket
+- Container deployment workflows
+- DNS entry management
+- Traefik configuration updates
 
-### Workflow Capabilities
-- **Container Deployment**: Automated container creation and configuration
-- **DNS Management**: Dynamic DNS entry creation and cleanup
-- **Traefik Configuration**: Automatic routing setup
-- **Health Monitoring**: Integration with health check systems
+### Infrastructure Integration
+- Host DNS server updates
+- Container DNS server management
+- SSH access to remote servers
+- PostgreSQL database connectivity
 
-## Development Notes
+## Security Considerations
 
-### Architecture Decisions
+- Docker socket access (requires careful permission management)
+- SSH key access (read-only mount)
+- Database credentials (environment variables)
+- Webhook endpoint security
+- Network isolation between services
 
-- Using official n8n Docker image as base for reliability and updates
-- Persistent volumes for workflow storage to survive container restarts
-- Webhook-based trigger system for external automation requests
-- Integration with existing PostgreSQL database for shared data storage
+## Next Steps
 
-### Key Components
-
-1. **n8n Container**: Core automation engine
-2. **Webhook Interface**: External trigger endpoints
-3. **Workflow Library**: Pre-built automation workflows
-4. **Integration Layer**: Connections to Docker, DNS, Traefik
-
-### Dependencies
-
-- Official n8n Docker image
-- PostgreSQL database container
-- Docker API access
-- DNS management tools (dnsmasq integration)
-- Traefik reverse proxy
-
-### Testing Strategy
-
-- Unit tests for individual workflow components
-- Integration tests with Docker API
-- End-to-end workflow testing
-- Performance testing for concurrent operations
-- Security testing for webhook endpoints
-
-## Implementation Plan
-
-### Phase 1: Basic Container Setup
-1. Create n8n Dockerfile with proper configuration
-2. Set up persistent volumes for data storage
-3. Configure networking and port exposure
-4. Integration with build system
-
-### Phase 2: Workflow Development
-5. Create basic container deployment workflow
-6. Implement DNS management workflows
-7. Add Traefik configuration workflows
-8. Set up webhook endpoints
-
-### Phase 3: Integration & Testing
-9. Integration with existing infrastructure
-10. Comprehensive testing suite
-11. Documentation and guides
-12. Performance optimization
-
-## Acceptance Criteria
-
-- [ ] n8n container builds and starts successfully
-- [ ] Web interface accessible via configured DNS name
-- [ ] Webhook endpoints respond correctly to requests
-- [ ] Basic container deployment workflow functional
-- [ ] DNS management integration working
-- [ ] Traefik configuration automation operational
-- [ ] Database connectivity established
-- [ ] Integration with build system complete
-- [ ] Test suite passing
-- [ ] Documentation complete and accurate
-
-## API Endpoints
-
-### Webhook Endpoints (to be implemented)
-- `POST /webhook/deploy-container` - Deploy new container
-- `POST /webhook/manage-dns` - DNS entry management
-- `POST /webhook/configure-traefik` - Traefik routing setup
-- `GET /webhook/health` - Health check endpoint
-
-## Configuration
-
-### Environment Variables
-- `N8N_HOST` - n8n host configuration
-- `N8N_PORT` - Web interface port (default: 5678)
-- `N8N_WEBHOOK_URL` - Webhook base URL
-- `DATABASE_HOST` - PostgreSQL host
-- `DATABASE_NAME` - Database name for n8n data
-
-### Volume Mounts
-- `/home/node/.n8n` - n8n data directory
-- `/opt/workflows` - Custom workflow definitions
-- `/opt/config` - Configuration files
-
-## Integration Notes
-
-### With Existing System
-- Integrates with current Docker network setup
-- Uses shared PostgreSQL database
-- Follows existing DNS naming conventions
-- Compatible with Traefik routing
-
-### Security Considerations
-- Webhook authentication and authorization
-- Secure database connections
-- Limited Docker API access
-- Audit logging for all operations
-
-## Resources
-
-- **Issue**: [#13 - Enhancement: Create n8n Automation Server Container](https://github.com/alistairhendersoninfo/dev-docker/issues/13)
-- **Project Board**: https://github.com/users/alistairhendersoninfo/projects/6
-- **Repository**: https://github.com/alistairhendersoninfo/dev-docker
-- **n8n Documentation**: https://docs.n8n.io/
-- **Docker API Reference**: https://docs.docker.com/engine/api/
-
----
-
-*Created via project task automation - Issue #13*
-*Last Updated: August 22, 2025*
+1. Complete DNS configuration
+2. Test basic workflows
+3. Create additional workflow templates
+4. Document API endpoints
+5. Plan Phase 2 HA implementation
