@@ -188,13 +188,32 @@ nslookup test.local.YOUR_DOMAIN
 
 ## Step 6: Install Host DNS Server
 
+### Fix hostname resolution
+
+First, ensure the hostname is properly configured in `/etc/hosts` to avoid sudo warnings:
+
+```bash
+# Check current hostname
+hostname
+
+# Update /etc/hosts to include the correct hostname mapping
+# Replace 'dev-docker' with your actual hostname if different
+echo "127.0.0.1 localhost
+127.0.1.1 $(hostname)
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters" | sudo tee /etc/hosts
+```
+
 ### Install dnsmasq on the host server
 
 Install dnsmasq directly on the host server (not in a container) to provide DNS resolution for external clients:
 
 ```bash
 sudo apt update
-sudo apt install -y dnsmasq
+sudo apt install -y dnsmasq dnsutils
 ```
 
 ### Configure dnsmasq
@@ -224,6 +243,21 @@ EOF
 
 **Note**: The Launch script will automatically add DNS entries to `/etc/dnsmasq.d/` when you configure your domain and start the containers.
 
+### Start and enable dnsmasq
+
+Enable and start the dnsmasq service:
+
+```bash
+sudo systemctl enable dnsmasq
+sudo systemctl start dnsmasq
+```
+
+Verify it's running:
+
+```bash
+sudo systemctl status dnsmasq
+```
+
 ### Handle systemd-resolved conflicts
 
 Disable systemd-resolved's DNS binding to avoid port conflicts:
@@ -245,19 +279,14 @@ EOF
 sudo chattr +i /etc/resolv.conf
 ```
 
-### Start and enable dnsmasq
-
-```bash
-sudo systemctl enable dnsmasq
-sudo systemctl start dnsmasq
-sudo systemctl status dnsmasq
-```
-
 ### Configure firewall for DNS
 
-Open DNS port for external clients:
+Install and configure firewall for DNS access:
 
 ```bash
+# Install firewall if not already installed
+sudo apt install -y ufw
+
 # Allow DNS queries from external clients
 sudo ufw allow 53/udp
 sudo ufw allow 53/tcp
