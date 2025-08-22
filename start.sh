@@ -107,27 +107,74 @@ print_success "Git repository is now clean and up-to-date"
 # Build images if they don't exist or if forced rebuild
 print_status "Checking Docker images..."
 
-# Check if minimal image exists
-if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
-    print_status "Building minimal image (bare shell with VIM)..."
-    docker build -t dev-minimal:latest -f base-image/Dockerfile.minimal base-image
-    print_success "Minimal image built successfully"
-else
-    print_success "Minimal image already exists"
-fi
+# Ask user which images to build
+echo ""
+echo "Which images would you like to build?"
+echo "1) Minimal image only (bare shell with VIM - fastest)"
+echo "2) Development image only (full tools - Cursor, OpenCode, Claude CLIs)"
+echo "3) Both images (recommended for first time setup)"
+echo "4) Skip building (use existing images)"
+echo ""
 
-# Check if dev-base image exists
-if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
-    print_status "Building development base image (full tools)..."
-    docker build -t dev-base:latest base-image
-    print_success "Development base image built successfully"
-else
-    print_success "Development base image already exists"
-fi
+read -p "Enter your choice (1-4): " build_choice
 
-# Check if playwright image exists
+case $build_choice in
+    1)
+        print_status "Building minimal image only..."
+        if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
+            docker build -t dev-minimal:latest -f base-image/Dockerfile.minimal base-image
+            print_success "Minimal image built successfully"
+        else
+            print_success "Minimal image already exists"
+        fi
+        ;;
+    2)
+        print_status "Building development image only..."
+        if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
+            docker build -t dev-base:latest base-image
+            print_success "Development image built successfully"
+        else
+            print_success "Development image already exists"
+        fi
+        ;;
+    3)
+        print_status "Building both images..."
+        # Build minimal image
+        if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
+            print_status "Building minimal image (bare shell with VIM)..."
+            docker build -t dev-minimal:latest -f base-image/Dockerfile.minimal base-image
+            print_success "Minimal image built successfully"
+        else
+            print_success "Minimal image already exists"
+        fi
+        
+        # Build development image
+        if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
+            print_status "Building development base image (full tools)..."
+            docker build -t dev-base:latest base-image
+            print_success "Development base image built successfully"
+        else
+            print_success "Development base image already exists"
+        fi
+        ;;
+    4)
+        print_status "Skipping image builds - using existing images"
+        ;;
+    *)
+        print_error "Invalid choice. Defaulting to building both images..."
+        # Default to building both
+        if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
+            docker build -t dev-minimal:latest -f base-image/Dockerfile.minimal base-image
+        fi
+        if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
+            docker build -t dev-base:latest base-image
+        fi
+        ;;
+esac
+
+# Always check for playwright image (required for full functionality)
 if [[ "$(docker images -q dev-playwright:latest 2> /dev/null)" == "" ]]; then
-    print_status "Building Playwright image..."
+    print_status "Building Playwright image (required for browser automation)..."
     docker build -t dev-playwright:latest playwright-image
     print_success "Playwright image built successfully"
 else
