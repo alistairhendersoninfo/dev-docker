@@ -14,8 +14,6 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     wget \
     unzip \
-    nodejs \
-    npm \
     tmux \
     zsh \
     net-tools \
@@ -35,6 +33,11 @@ RUN apt-get update && apt-get install -y \
     tar \
     gzip \
     && apt-get clean
+
+# Install Node.js 18+ from official source
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install -g npm@latest
 
 # Install essential lightweight CLI tools (available in Ubuntu repos)
 RUN apt-get update && apt-get install -y \
