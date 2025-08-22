@@ -202,6 +202,12 @@ temp/
 .local/
 local/
 
+# Local configuration (survives git pulls)
+~/.dev-docker/
+.dev-docker-local/
+*.local.json
+local-config/
+
 # Development tracking (exclude from public repos)
 TODO.md
 *.todo

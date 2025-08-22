@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Development Docker Environment - Start Script
-# This script ensures the project is up-to-date with git and starts all services
+# Build Docker Images Script
+# Builds base images for the development environment
 
 set -e
 
-echo "🚀 Starting Development Docker Environment"
-echo "=========================================="
+echo "🏗️  Build Docker Images"
+echo "======================"
 
 # Colors for output
 RED='\033[0;31m'
@@ -32,322 +32,203 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Check if we're in the right directory
-COMPOSE_FILE=""
-if [[ -f "docker/docker-compose.yml" ]]; then
-    COMPOSE_FILE="docker/docker-compose.yml"
-else
-    print_error "Please run this script from the project root directory"
-    print_error "Expected to find: docker/docker-compose.yml"
-    print_error ""
-    print_error "Current directory: $(pwd)"
-    print_error "Files in current directory:"
-    ls -la | head -10
-    print_error ""
-    print_error "Please run this script from the project root directory where docker/docker-compose.yml is located"
-    exit 1
-fi
+# Configuration directories
+LOCAL_CONFIG_DIR="$HOME/.dev-docker"
+IMAGES_REGISTRY="$LOCAL_CONFIG_DIR/images.json"
+SETTINGS_FILE="$LOCAL_CONFIG_DIR/settings.json"
 
-print_success "Found docker-compose file: $COMPOSE_FILE"
-
-# Check if Docker is installed
-if ! command -v docker &> /dev/null; then
-    print_error "Docker is not installed. Please install Docker first."
-    exit 1
-fi
-
-# Check if user is in docker group
-if ! groups | grep -q docker; then
-    print_warning "User is not in docker group. Adding user to docker group..."
-    sudo usermod -aG docker $USER
-    print_warning "User added to docker group. Please log out and log back in, then run this script again."
-    exit 0
-fi
-
-# Check Docker daemon status
-print_status "Checking Docker daemon status..."
-if ! docker info &> /dev/null; then
-    print_warning "Docker daemon is not running. Starting Docker..."
-    sudo systemctl start docker
-    sleep 2
-fi
-
-# Git operations - always pull latest and handle conflicts
-print_status "Checking git status and pulling latest changes..."
-
-# Check if there are uncommitted changes
-if [[ -n $(git status --porcelain) ]]; then
-    print_warning "Local changes detected. Stashing them to pull latest..."
-    git stash push -m "Auto-stashed by Build-Docker-Images.sh $(date)"
-fi
-
-# Fetch latest from remote
-print_status "Fetching latest changes from remote..."
-git fetch origin
-
-# Check if we're behind remote
-if [[ $(git rev-list HEAD..origin/main --count) -gt 0 ]]; then
-    print_status "Local branch is behind remote. Updating..."
+# Create local config directory if it doesn't exist
+create_local_config() {
+    if [[ ! -d "$LOCAL_CONFIG_DIR" ]]; then
+        print_status "Creating local configuration directory..."
+        mkdir -p "$LOCAL_CONFIG_DIR"
+    fi
     
-    # Reset to match remote exactly (this will overwrite any local changes)
-    print_warning "Resetting local branch to match remote (this will overwrite local changes)..."
-    git reset --hard origin/main
+    # Initialize images registry if it doesn't exist
+    if [[ ! -f "$IMAGES_REGISTRY" ]]; then
+        print_status "Initializing images registry..."
+        cat > "$IMAGES_REGISTRY" << 'EOF'
+{
+  "standard": {
+    "minimal": {
+      "name": "dev-minimal:latest",
+      "description": "Ubuntu + basic tools",
+      "built": false,
+      "dockerfile": "docker/base-image/Dockerfile.minimal"
+    },
+    "development": {
+      "name": "dev-base:latest",
+      "description": "Full development environment",
+      "built": false,
+      "dockerfile": "docker/base-image/Dockerfile"
+    },
+    "playwright": {
+      "name": "dev-playwright:latest",
+      "description": "Browser automation tools",
+      "built": false,
+      "dockerfile": "docker/playwright-image/Dockerfile"
+    },
+    "traefik": {
+      "name": "dev-traefik:latest",
+      "description": "Reverse proxy server",
+      "built": false,
+      "dockerfile": "docker/traefik/Dockerfile"
+    },
+    "dns": {
+      "name": "dev-dns:latest",
+      "description": "Local DNS server",
+      "built": false,
+      "dockerfile": "docker/dns/Dockerfile"
+    }
+  },
+  "custom": {}
+}
+EOF
+    fi
     
-    print_success "Local branch updated to match remote"
-else
-    print_success "Local branch is up to date with remote"
-fi
+    # Initialize settings if they don't exist
+    if [[ ! -f "$SETTINGS_FILE" ]]; then
+        print_status "Initializing settings..."
+        cat > "$SETTINGS_FILE" << 'EOF'
+{
+  "domain": "",
+  "email": "",
+  "last_build": ""
+}
+EOF
+    fi
+}
 
-# Clean up any untracked files (optional, but keeps things clean)
-print_status "Cleaning up untracked files..."
-git clean -fd
+# Check if image exists
+check_image_exists() {
+    local image_name=$1
+    if [[ "$(docker images -q $image_name 2> /dev/null)" != "" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
 
-print_success "Git repository is now clean and up-to-date"
+# Update image registry
+update_image_registry() {
+    local image_key=$1
+    local built_status=$2
+    
+    # Use jq to update the registry if available, otherwise manual update
+    if command -v jq &> /dev/null; then
+        jq ".standard.$image_key.built = $built_status" "$IMAGES_REGISTRY" > "$IMAGES_REGISTRY.tmp" && mv "$IMAGES_REGISTRY.tmp" "$IMAGES_REGISTRY"
+    else
+        print_warning "jq not available, registry update skipped"
+    fi
+}
 
-# Build images if they don't exist or if forced rebuild
-print_status "Checking Docker images..."
+# Build image function
+build_image() {
+    local image_key=$1
+    local image_name=$2
+    local dockerfile_path=$3
+    local description=$4
+    
+    print_status "Building $description..."
+    
+    if check_image_exists "$image_name"; then
+        print_success "$description already exists"
+        update_image_registry "$image_key" "true"
+        return 0
+    fi
+    
+    # Build the image
+    if [[ "$dockerfile_path" == *"Dockerfile.minimal" ]]; then
+        docker build -t "$image_name" -f "$dockerfile_path" docker/base-image
+    elif [[ "$dockerfile_path" == *"base-image"* ]]; then
+        docker build -t "$image_name" docker/base-image
+    else
+        docker build -t "$image_name" "$(dirname $dockerfile_path)"
+    fi
+    
+    if [[ $? -eq 0 ]]; then
+        print_success "$description built successfully"
+        update_image_registry "$image_key" "true"
+    else
+        print_error "Failed to build $description"
+        return 1
+    fi
+}
 
-# Ask user which images to build
-echo ""
-echo "Which images would you like to build?"
-echo "1) Minimal image only (bare shell with VIM - fastest)"
-echo "2) Development image only (full tools - Cursor, OpenCode, Claude CLIs)"
-echo "3) Playwright image only (browser automation)"
-echo "4) All development images (minimal + development + playwright)"
-echo "5) Configure Traefik and DNS"
-echo "6) Build everything and configure (recommended for first setup)"
-echo "7) Skip building (use existing images)"
-echo "8) Exit"
-echo ""
-
-read -p "Enter your choice (1-8): " build_choice
-
-case $build_choice in
-    1)
-        print_status "Building minimal image only..."
-        if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
-            docker build -t dev-minimal:latest -f docker/base-image/Dockerfile.minimal docker/base-image
-            print_success "Minimal image built successfully"
-        else
-            print_success "Minimal image already exists"
-        fi
-        ;;
-    2)
-        print_status "Building development image only..."
-        if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
-            docker build -t dev-base:latest docker/base-image
-            print_success "Development image built successfully"
-        else
-            print_success "Development image already exists"
-        fi
-        ;;
-    3)
-        print_status "Building Playwright image only..."
-        if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
-            print_status "Building base image first (required for Playwright)..."
-            docker build -t dev-base:latest docker/base-image
-            print_success "Base image built successfully"
-        fi
-        if [[ "$(docker images -q dev-playwright:latest 2> /dev/null)" == "" ]]; then
-            print_status "Building Playwright image..."
-            docker build -t dev-playwright:latest docker/playwright-image
-            print_success "Playwright image built successfully"
-        else
-            print_success "Playwright image already exists"
-        fi
-        ;;
-    4)
-        print_status "Building all images..."
-        # Build minimal image
-        if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
-            print_status "Building minimal image (bare shell with VIM)..."
-            docker build -t dev-minimal:latest -f docker/base-image/Dockerfile.minimal docker/base-image
-            print_success "Minimal image built successfully"
-        else
-            print_success "Minimal image already exists"
-        fi
-        
-        # Build development image
-        if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
-            print_status "Building development base image (full tools)..."
-            docker build -t dev-base:latest docker/base-image
-            print_success "Development base image built successfully"
-        else
-            print_success "Development base image already exists"
-        fi
-        
-        # Build Playwright image
-        if [[ "$(docker images -q dev-playwright:latest 2> /dev/null)" == "" ]]; then
-            print_status "Building Playwright image (browser automation)..."
-            docker build -t dev-playwright:latest docker/playwright-image
-            print_success "Playwright image built successfully"
-        else
-            print_success "Playwright image already exists"
-        fi
-        ;;
-    5)
-        print_status "Configuring Traefik (using official image)..."
-        
-        # Prompt for domain and email configuration
-        print_status "Configuring Traefik domain and email..."
-        
-        # Check if domain is already configured (check multiple files)
-        if grep -q "alistairhenderson\.info" docker/docker-compose.yml || grep -q "alistairhenderson\.info" docker/dns/dnsmasq.conf || grep -q "YOUR_DOMAIN\.com" docker/docker-compose.yml; then
-            echo ""
-            read -p "Enter your domain name (e.g., example.com): " user_domain
-            if [[ -n "$user_domain" ]]; then
-                # Update domain in docker-compose.yml
-                sed -i "s/alistairhenderson\.info/$user_domain/g" docker/docker-compose.yml
-                sed -i "s/YOUR_DOMAIN\.com/$user_domain/g" docker/docker-compose.yml
-                
-                # Update domain in dnsmasq.conf
-                sed -i "s/alistairhenderson\.info/$user_domain/g" docker/dns/dnsmasq.conf
-                
-                print_success "Domain updated to: $user_domain"
-            else
-                print_warning "No domain provided, using default"
+# Main function
+main() {
+    # Create local config
+    create_local_config
+    
+    # Check if we're in the right directory
+    if [[ ! -f "docker/docker-compose.yml" ]]; then
+        print_error "Please run this script from the project root directory"
+        exit 1
+    fi
+    
+    # Check if Docker is installed
+    if ! command -v docker &> /dev/null; then
+        print_error "Docker is not installed. Please install Docker first."
+        exit 1
+    fi
+    
+    echo ""
+    echo "Which base images would you like to build?"
+    echo "1) Minimal base image (Ubuntu + basic tools)"
+    echo "2) Development base image (Ubuntu + dev tools)"
+    echo "3) Playwright base image (browser automation)"
+    echo "4) Traefik base image (reverse proxy)"
+    echo "5) DNS base image (local DNS server)"
+    echo "6) All standard images"
+    echo "7) Exit"
+    echo ""
+    
+    read -p "Enter your choice (1-7): " build_choice
+    
+    case $build_choice in
+        1)
+            build_image "minimal" "dev-minimal:latest" "docker/base-image/Dockerfile.minimal" "Minimal base image"
+            ;;
+        2)
+            build_image "development" "dev-base:latest" "docker/base-image/Dockerfile" "Development base image"
+            ;;
+        3)
+            # Ensure base image exists first
+            if ! check_image_exists "dev-base:latest"; then
+                print_status "Building development base image first (required for Playwright)..."
+                build_image "development" "dev-base:latest" "docker/base-image/Dockerfile" "Development base image"
             fi
-        else
-            print_success "Domain already configured"
-        fi
-        
-        # Prompt for email and update Traefik config
-        print_status "Configuring Traefik email address..."
-        if grep -q "your-email@example.com" docker/traefik/traefik.yml; then
-            echo ""
-            read -p "Enter your email address for Let's Encrypt SSL certificates: " user_email
-            if [[ -n "$user_email" ]]; then
-                sed -i "s/your-email@example.com/$user_email/g" docker/traefik/traefik.yml
-                print_success "Traefik email updated to: $user_email"
-            else
-                print_warning "No email provided, using default placeholder"
-            fi
-        else
-            print_success "Traefik email already configured"
-        fi
-        
-        print_success "Traefik and DNS configuration updated"
-        ;;
-    6)
-        print_status "Building everything and configuring (complete setup)..."
-        
-        # Build all images
-        if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
-            print_status "Building minimal image..."
-            docker build -t dev-minimal:latest -f docker/base-image/Dockerfile.minimal docker/base-image
-            print_success "Minimal image built successfully"
-        else
-            print_success "Minimal image already exists"
-        fi
-        
-        if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
-            print_status "Building development base image..."
-            docker build -t dev-base:latest docker/base-image
-            print_success "Development base image built successfully"
-        else
-            print_success "Development base image already exists"
-        fi
-        
-        if [[ "$(docker images -q dev-playwright:latest 2> /dev/null)" == "" ]]; then
-            print_status "Building Playwright image..."
-            docker build -t dev-playwright:latest docker/playwright-image
-            print_success "Playwright image built successfully"
-        else
-            print_success "Playwright image already exists"
-        fi
-        
-        # Configure Traefik and DNS
-        print_status "Configuring Traefik domain and email..."
-        if grep -q "alistairhenderson\.info" docker/docker-compose.yml || grep -q "alistairhenderson\.info" docker/dns/dnsmasq.conf || grep -q "YOUR_DOMAIN\.com" docker/docker-compose.yml; then
-            echo ""
-            read -p "Enter your domain name (e.g., example.com): " user_domain
-            if [[ -n "$user_domain" ]]; then
-                sed -i "s/alistairhenderson\.info/$user_domain/g" docker/docker-compose.yml
-                sed -i "s/YOUR_DOMAIN\.com/$user_domain/g" docker/docker-compose.yml
-                sed -i "s/alistairhenderson\.info/$user_domain/g" docker/dns/dnsmasq.conf
-                print_success "Domain updated to: $user_domain"
-            else
-                print_warning "No domain provided, using default"
-            fi
-        else
-            print_success "Domain already configured"
-        fi
-        
-        if grep -q "your-email@example.com" docker/traefik/traefik.yml; then
-            echo ""
-            read -p "Enter your email address for Let's Encrypt SSL certificates: " user_email
-            if [[ -n "$user_email" ]]; then
-                sed -i "s/your-email@example.com/$user_email/g" docker/traefik/traefik.yml
-                print_success "Traefik email updated to: $user_email"
-            else
-                print_warning "No email provided, using default placeholder"
-            fi
-        else
-            print_success "Traefik email already configured"
-        fi
-        
-        print_success "Complete setup finished - all images built and configured!"
-        ;;
-    7)
-        print_status "Skipping image builds - using existing images"
-        ;;
-    8)
-        print_status "Exiting..."
-        exit 0
-        ;;
-    *)
-        print_error "Invalid choice. Defaulting to complete setup..."
-        # Default to building both
-        if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
-            docker build -t dev-minimal:latest -f docker/base-image/Dockerfile.minimal docker/base-image
-        fi
-        if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
-            docker build -t dev-base:latest docker/base-image
-        fi
-        ;;
-esac
+            build_image "playwright" "dev-playwright:latest" "docker/playwright-image/Dockerfile" "Playwright base image"
+            ;;
+        4)
+            build_image "traefik" "dev-traefik:latest" "docker/traefik/Dockerfile" "Traefik base image"
+            ;;
+        5)
+            build_image "dns" "dev-dns:latest" "docker/dns/Dockerfile" "DNS base image"
+            ;;
+        6)
+            print_status "Building all standard images..."
+            build_image "minimal" "dev-minimal:latest" "docker/base-image/Dockerfile.minimal" "Minimal base image"
+            build_image "development" "dev-base:latest" "docker/base-image/Dockerfile" "Development base image"
+            build_image "playwright" "dev-playwright:latest" "docker/playwright-image/Dockerfile" "Playwright base image"
+            build_image "traefik" "dev-traefik:latest" "docker/traefik/Dockerfile" "Traefik base image"
+            build_image "dns" "dev-dns:latest" "docker/dns/Dockerfile" "DNS base image"
+            print_success "All standard images built successfully!"
+            ;;
+        7)
+            print_status "Exiting..."
+            exit 0
+            ;;
+        *)
+            print_error "Invalid choice. Please select 1-7."
+            exit 1
+            ;;
+    esac
+    
+    echo ""
+    print_success "Build process completed!"
+    print_status "Use Launch-Docker-Services.sh to start containers from these images."
+}
 
-# Only build playwright image if it doesn't exist and user wants it
-if [[ "$(docker images -q dev-playwright:latest 2> /dev/null)" == "" ]]; then
-    print_status "Playwright image not found. You can build it later if needed."
-    print_status "To build it manually: docker build -t dev-playwright:latest docker/playwright-image"
-else
-    print_success "Playwright image already exists"
-fi
-
-# Check if required images exist before starting services
-print_status "Checking required images..."
-if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
-    print_warning "dev-base:latest image not found. Building it now..."
-    docker build -t dev-base:latest docker/base-image
-    print_success "Base image built successfully"
-fi
-
-# Start services
-print_status "Starting all services..."
-docker compose -f "$COMPOSE_FILE" up -d
-
-# Wait a moment for services to start
-sleep 3
-
-# Check service status
-print_status "Checking service status..."
-docker compose -f "$COMPOSE_FILE" ps
-
-print_success "All services started successfully!"
-echo ""
-echo "🌐 Services are now running:"
-echo "   - DNS: 172.20.0.2"
-echo "   - Traefik: http://localhost (ports 80, 443)"
-echo "   - Base Image: 172.20.0.5"
-echo "   - Project1: 172.20.0.10 (SSH: localhost:2221)"
-echo "   - Project2: 172.20.0.11 (SSH: localhost:2222)"
-echo "   - Playwright: 172.20.0.12 (SSH: localhost:2223)"
-echo ""
-echo "🔑 SSH Access:"
-echo "   ssh developer@localhost -p 2221  # Project1"
-echo "   ssh developer@localhost -p 2222  # Project2"
-echo "   ssh developer@localhost -p 2223  # Playwright"
-echo ""
-echo "📊 View logs: docker compose -f \"$COMPOSE_FILE\" logs -f"
-echo "🛑 Stop services: docker compose -f \"$COMPOSE_FILE\" down"
+# Run main function
+main "$@"
