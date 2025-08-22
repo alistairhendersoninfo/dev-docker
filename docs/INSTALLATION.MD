@@ -241,7 +241,37 @@ conf-dir=/etc/dnsmasq.d/,*.conf
 EOF
 ```
 
-**Note**: The Launch script will automatically add DNS entries to `/etc/dnsmasq.d/` when you configure your domain and start the containers.
+### Add DNS entries for container services
+
+Create DNS entries for all container services that point to the host IP address:
+
+```bash
+# Replace 192.168.68.23 with your actual host IP address
+HOST_IP="192.168.68.23"
+
+sudo tee /etc/dnsmasq.d/container-services.conf > /dev/null << EOF
+# Container service DNS entries (pointing to host IP for external access)
+address=/dns.alistairhenderson.info/$HOST_IP
+address=/traefik.alistairhenderson.info/$HOST_IP
+address=/nginx.alistairhenderson.info/$HOST_IP
+address=/base-image.alistairhenderson.info/$HOST_IP
+address=/playwright.alistairhenderson.info/$HOST_IP
+address=/n8n.alistairhenderson.info/$HOST_IP
+address=/postgres.alistairhenderson.info/$HOST_IP
+address=/api.alistairhenderson.info/$HOST_IP
+
+# Local development domains (for container-to-container communication)
+address=/.local.alistairhenderson.info/172.20.0.3
+EOF
+```
+
+**Note**: Replace `192.168.68.23` with your actual host server IP address. These entries allow external clients to access the containerized services through the host.
+
+### Restart dnsmasq to load new configuration
+
+```bash
+sudo systemctl restart dnsmasq
+```
 
 ### Start and enable dnsmasq
 
