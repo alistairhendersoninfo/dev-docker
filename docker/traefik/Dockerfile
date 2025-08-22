@@ -8,8 +8,7 @@ COPY traefik.yml /etc/traefik/
 USER root
 RUN mkdir -p /var/log/traefik /var/lib/traefik && \
     touch /var/lib/traefik/acme.json && \
-    chmod 600 /var/lib/traefik/acme.json && \
-    chown -R traefik:traefik /var/log/traefik /var/lib/traefik
+    chmod 600 /var/lib/traefik/acme.json
 
 # Switch back to traefik user
 USER traefik
