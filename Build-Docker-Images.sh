@@ -225,11 +225,10 @@ case $build_choice in
         ;;
 esac
 
-# Always check for playwright image (required for full functionality)
+# Only build playwright image if it doesn't exist and user wants it
 if [[ "$(docker images -q dev-playwright:latest 2> /dev/null)" == "" ]]; then
-    print_status "Building Playwright image (required for browser automation)..."
-    docker build -t dev-playwright:latest docker/playwright-image
-    print_success "Playwright image built successfully"
+    print_status "Playwright image not found. You can build it later if needed."
+    print_status "To build it manually: docker build -t dev-playwright:latest docker/playwright-image"
 else
     print_success "Playwright image already exists"
 fi
