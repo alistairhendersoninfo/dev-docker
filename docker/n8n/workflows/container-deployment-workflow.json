@@ -1,0 +1,151 @@
+{
+  "name": "Container Deployment Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "deploy-container",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "container-deploy"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract container deployment parameters\nconst payload = $json;\n\n// Validate required parameters\nif (!payload.containerName || !payload.image) {\n  throw new Error('Missing required parameters: containerName and image');\n}\n\n// Set default values\nconst deployment = {\n  containerName: payload.containerName,\n  image: payload.image,\n  ports: payload.ports || [],\n  environment: payload.environment || {},\n  volumes: payload.volumes || [],\n  network: payload.network || 'traefik-network',\n  dnsName: payload.dnsName || `${payload.containerName}-local.alistairhenderson.info`,\n  sshPort: payload.sshPort || null\n};\n\nreturn { deployment };"
+      },
+      "id": "process-request",
+      "name": "Process Deployment Request",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "command": "docker run -d --name {{ $json.deployment.containerName }} --network {{ $json.deployment.network }} {{ $json.deployment.image }}",
+        "options": {}
+      },
+      "id": "deploy-container",
+      "name": "Deploy Container",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Create DNS entry for the container\nconst deployment = $json.deployment;\n\n// Get container IP\nconst containerInfo = $json;\nconst containerId = containerInfo.stdout.trim();\n\n// Prepare DNS update\nconst dnsEntry = {\n  hostname: deployment.dnsName,\n  containerId: containerId,\n  containerName: deployment.containerName\n};\n\nreturn { dnsEntry };"
+      },
+      "id": "prepare-dns",
+      "name": "Prepare DNS Entry",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "command": "echo '{{ $json.dnsEntry.hostname }} {{ $json.dnsEntry.containerId }}' >> /etc/hosts",
+        "options": {}
+      },
+      "id": "update-dns",
+      "name": "Update DNS",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"success\",\n  \"message\": \"Container deployed successfully\",\n  \"containerName\": \"{{ $json.deployment.containerName }}\",\n  \"dnsName\": \"{{ $json.dnsEntry.hostname }}\",\n  \"containerId\": \"{{ $json.dnsEntry.containerId }}\"\n}"
+      },
+      "id": "success-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"error\",\n  \"message\": \"{{ $json.error.message }}\",\n  \"details\": \"{{ $json.error.stack }}\"\n}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "error-response",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1340, 500]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Process Deployment Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Deployment Request": {
+      "main": [
+        [
+          {
+            "node": "Deploy Container",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deploy Container": {
+      "main": [
+        [
+          {
+            "node": "Prepare DNS Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare DNS Entry": {
+      "main": [
+        [
+          {
+            "node": "Update DNS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update DNS": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "timezone": "UTC"
+  },
+  "createdAt": "2025-08-22T22:00:00.000Z",
+  "updatedAt": "2025-08-22T22:00:00.000Z",
+  "id": "container-deployment",
+  "tags": ["automation", "docker", "deployment"]
+}

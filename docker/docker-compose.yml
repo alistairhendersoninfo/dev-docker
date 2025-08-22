@@ -25,9 +25,11 @@ services:
       - ./docker/traefik:/etc/traefik
       - ./docker/traefik/acme.json:/etc/traefik/acme.json
       - ~/.aws:/root/.aws:ro
-
     networks:
-      - devnet
+      devnet:
+        ipv4_address: 172.20.0.3
+    dns:
+      - 172.20.0.2
     depends_on:
       - dnsmasq
 
