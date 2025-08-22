@@ -60,12 +60,26 @@ RUN apt-get update && apt-get install -y \
 RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 && \
     chmod a+x /usr/local/bin/yq
 
-# Install additional lightweight tools available in Ubuntu repos
-RUN apt-get update && apt-get install -y \
-    silversearcher-ag \
-    ack-grep \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+# Install essential AI debugging tools manually with correct URLs
+RUN set -eux; \
+    # Install ripgrep (fast grep replacement for AI debugging)
+    wget -qO /tmp/ripgrep.deb "https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep_14.1.1_amd64.deb"; \
+    dpkg -i /tmp/ripgrep.deb; \
+    rm -f /tmp/ripgrep.deb; \
+    # Install fd-find (fast find replacement for AI debugging)
+    wget -qO /tmp/fd.deb "https://github.com/sharkdp/fd/releases/download/v9.0.0/fd_9.0.0_amd64.deb"; \
+    dpkg -i /tmp/fd.deb; \
+    rm -f /tmp/fd.deb; \
+    # Install bat (better cat with syntax highlighting for AI debugging)
+    wget -qO /tmp/bat.deb "https://github.com/sharkdp/bat/releases/download/v0.24.0/bat_0.24.0_amd64.deb"; \
+    dpkg -i /tmp/bat.deb; \
+    rm -f /tmp/bat.deb; \
+    # Install exa (better ls replacement for AI debugging)
+    wget -qO /tmp/exa.deb "https://github.com/ogham/exa/releases/download/v0.10.1/exa_0.10.1_amd64.deb"; \
+    dpkg -i /tmp/exa.deb; \
+    rm -f /tmp/exa.deb; \
+    # Clean up any remaining temp files and apt cache
+    rm -rf /tmp/* /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 # Install tldr manually (not in Ubuntu repos)
 RUN npm install -g tldr
