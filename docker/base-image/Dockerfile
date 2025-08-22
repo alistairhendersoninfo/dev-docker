@@ -60,25 +60,29 @@ RUN apt-get update && apt-get install -y \
 RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 && \
     chmod a+x /usr/local/bin/yq
 
-# Install ripgrep manually (newer version than Ubuntu repos)
-RUN wget -qO /tmp/ripgrep.deb https://github.com/BurntSushi/ripgrep/releases/latest/download/ripgrep_*_amd64.deb && \
-    dpkg -i /tmp/ripgrep.deb && \
-    rm /tmp/ripgrep.deb
-
-# Install fd-find manually (newer version than Ubuntu repos)
-RUN wget -qO /tmp/fd.deb https://github.com/sharkdp/fd/releases/latest/download/fd_*_amd64.deb && \
-    dpkg -i /tmp/fd.deb && \
-    rm /tmp/fd.deb
-
-# Install bat manually (newer version than Ubuntu repos)
-RUN wget -qO /tmp/bat.deb https://github.com/sharkdp/bat/releases/latest/download/bat_*_amd64.deb && \
-    dpkg -i /tmp/bat.deb && \
-    rm /tmp/bat.deb
-
-# Install exa manually (newer version than Ubuntu repos)
-RUN wget -qO /tmp/exa.deb https://github.com/ogham/exa/releases/latest/download/exa_*_amd64.deb && \
-    dpkg -i /tmp/exa.deb && \
-    rm /tmp/exa.deb
+# Install modern CLI tools manually with proper version detection and cleanup
+RUN set -eux; \
+    # Install ripgrep
+    RIPGREP_VERSION=$(curl -s "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+'); \
+    wget -qO /tmp/ripgrep.deb "https://github.com/BurntSushi/ripgrep/releases/latest/download/ripgrep_${RIPGREP_VERSION}-1_amd64.deb"; \
+    dpkg -i /tmp/ripgrep.deb; \
+    rm -f /tmp/ripgrep.deb; \
+    # Install fd-find
+    FD_VERSION=$(curl -s "https://api.github.com/repos/sharkdp/fd/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+'); \
+    wget -qO /tmp/fd.deb "https://github.com/sharkdp/fd/releases/latest/download/fd_${FD_VERSION}_amd64.deb"; \
+    dpkg -i /tmp/fd.deb; \
+    rm -f /tmp/fd.deb; \
+    # Install bat
+    BAT_VERSION=$(curl -s "https://api.github.com/repos/sharkdp/bat/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+'); \
+    wget -qO /tmp/bat.deb "https://github.com/sharkdp/bat/releases/latest/download/bat_${BAT_VERSION}_amd64.deb"; \
+    dpkg -i /tmp/bat.deb; \
+    rm -f /tmp/bat.deb; \
+    # Install exa
+    EXA_VERSION=$(curl -s "https://api.github.com/repos/ogham/exa/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+'); \
+    wget -qO /tmp/exa.deb "https://github.com/ogham/exa/releases/latest/download/exa_${EXA_VERSION}_amd64.deb"; \
+    rm -f /tmp/exa.deb; \
+    # Clean up any remaining temp files and apt cache
+    rm -rf /tmp/* /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 # Install tldr manually (not in Ubuntu repos)
 RUN npm install -g tldr
@@ -89,14 +93,16 @@ RUN npm install -g \
     xml2js \
     csv-parser \
     json \
-    && npm cache clean --force
+    && npm cache clean --force \
+    && rm -rf /root/.npm /tmp/npm-*
 
 # Install additional lightweight system tools
 RUN apt-get update && apt-get install -y \
     moreutils \
     parallel \
     expect \
-    && apt-get clean
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 # Install Oh My Zsh
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
