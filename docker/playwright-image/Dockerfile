@@ -1,30 +1,32 @@
-FROM dev-base:latest
+FROM mcr.microsoft.com/playwright:v1.55.0-jammy
 
-# Install Playwright dependencies
+# Install additional development tools
 RUN apt-get update && apt-get install -y \
-    chromium-browser \
-    fonts-liberation \
-    libappindicator3-1 \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libnspr4 \
-    libnss3 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    xdg-utils \
+    curl \
+    wget \
+    git \
+    vim \
+    nano \
+    htop \
+    tree \
+    jq \
+    unzip \
     && apt-get clean
 
-# Install Playwright
-RUN npx playwright install --with-deps
+# Verify Node.js version (should already be 18+)
+RUN node --version && npm --version
+
+# Note: Playwright browsers are already installed in the official image
 
 # Install additional tools
 RUN npm install -g claude-cli
 
-# Note: Cursor CLI and OpenCode CLI are already available from base image
+# Expose port for development server (if needed)
+EXPOSE 3000 8080
+
+# Set working directory
+WORKDIR /workspace
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD node --version || exit 1
