@@ -35,9 +35,8 @@ RUN apk add --no-cache \
 
 # Install additional n8n community nodes for container management
 USER node
-RUN npm install -g n8n-nodes-docker \
-    n8n-nodes-ssh \
-    n8n-nodes-webhook-extended
+# Note: Install only verified community nodes that exist in npm registry
+# RUN npm install -g n8n-nodes-docker (verify availability first)
 
 # Create custom workflows directory
 WORKDIR /home/node/.n8n
