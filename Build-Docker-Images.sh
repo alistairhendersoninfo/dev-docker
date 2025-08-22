@@ -161,9 +161,9 @@ case $build_choice in
         fi
         ;;
     4)
-        print_status "Building Traefik server..."
+        print_status "Configuring Traefik (using official image)..."
         
-        # Prompt for domain and email configuration BEFORE building
+        # Prompt for domain and email configuration
         print_status "Configuring Traefik domain and email..."
         
         # Check if domain is already configured (check multiple files)
@@ -186,7 +186,7 @@ case $build_choice in
             print_success "Domain already configured"
         fi
         
-        # Prompt for email and update Traefik config BEFORE building
+        # Prompt for email and update Traefik config
         print_status "Configuring Traefik email address..."
         if grep -q "your-email@example.com" docker/traefik/traefik.yml; then
             echo ""
@@ -201,13 +201,7 @@ case $build_choice in
             print_success "Traefik email already configured"
         fi
         
-        # Now build the image AFTER configuration is updated
-        if [[ "$(docker images -q dev-traefik:latest 2> /dev/null)" == "" ]]; then
-            docker build -t dev-traefik:latest docker/traefik
-            print_success "Traefik server built successfully"
-        else
-            print_success "Traefik server already exists"
-        fi
+        print_success "Traefik configuration updated - using official image from docker-compose.yml"
         ;;
     5)
         print_status "DNS server is a placeholder - no build needed"
