@@ -32,67 +32,19 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Function to find project root directory
-find_project_root() {
-    local current_dir="$PWD"
-    local max_depth=10  # Prevent infinite loops
-    
-    for ((i=0; i<max_depth; i++)); do
-        # Check if we're in the project root
-        if [[ -f "$current_dir/docker/docker-compose.yml" ]] || [[ -f "$current_dir/docker-compose.yml" ]]; then
-            echo "$current_dir"
-            return 0
-        fi
-        
-        # Go up one directory
-        local parent_dir="$(dirname "$current_dir")"
-        
-        # If we can't go up further, we're at the root
-        if [[ "$parent_dir" == "$current_dir" ]]; then
-            return 1
-        fi
-        
-        current_dir="$parent_dir"
-    done
-    
-    return 1
-}
-
-# Find project root directory
-print_status "Looking for project root directory..."
-PROJECT_ROOT="$(find_project_root)"
-
-if [[ -z "$PROJECT_ROOT" ]]; then
-    print_error "Could not find project root directory"
-    print_error "Expected to find either:"
-    print_error "  - docker/docker-compose.yml (current structure)"
-    print_error "  - docker-compose.yml (alternative structure)"
+# Check if we're in the right directory
+COMPOSE_FILE=""
+if [[ -f "docker-compose.yml" ]]; then
+    COMPOSE_FILE="docker-compose.yml"
+else
+    print_error "Please run this script from the docker directory"
+    print_error "Expected to find: docker-compose.yml"
     print_error ""
     print_error "Current directory: $(pwd)"
     print_error "Files in current directory:"
     ls -la | head -10
     print_error ""
-    print_error "Please run this script from within the dev-docker project directory"
-    exit 1
-fi
-
-print_success "Found project root: $PROJECT_ROOT"
-
-# Change to project root directory
-if [[ "$PWD" != "$PROJECT_ROOT" ]]; then
-    print_status "Changing to project root directory..."
-    cd "$PROJECT_ROOT"
-    print_success "Now in: $(pwd)"
-fi
-
-# Check if we're in the right directory
-COMPOSE_FILE=""
-if [[ -f "docker/docker-compose.yml" ]]; then
-    COMPOSE_FILE="docker/docker-compose.yml"
-elif [[ -f "docker-compose.yml" ]]; then
-    COMPOSE_FILE="docker-compose.yml"
-else
-    print_error "Something went wrong - compose file not found after directory change"
+    print_error "Please run this script from the docker directory where docker-compose.yml is located"
     exit 1
 fi
 
@@ -158,7 +110,7 @@ print_status "Checking Docker images..."
 # Check if minimal image exists
 if [[ "$(docker images -q dev-minimal:latest 2> /dev/null)" == "" ]]; then
     print_status "Building minimal image (bare shell with VIM)..."
-    docker build -t dev-minimal:latest -f docker/base-image/Dockerfile.minimal docker/base-image
+    docker build -t dev-minimal:latest -f base-image/Dockerfile.minimal base-image
     print_success "Minimal image built successfully"
 else
     print_success "Minimal image already exists"
@@ -167,7 +119,7 @@ fi
 # Check if dev-base image exists
 if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
     print_status "Building development base image (full tools)..."
-    docker build -t dev-base:latest docker/base-image
+    docker build -t dev-base:latest base-image
     print_success "Development base image built successfully"
 else
     print_success "Development base image already exists"
@@ -176,7 +128,7 @@ fi
 # Check if playwright image exists
 if [[ "$(docker images -q dev-playwright:latest 2> /dev/null)" == "" ]]; then
     print_status "Building Playwright image..."
-    docker build -t dev-playwright:latest docker/playwright-image
+    docker build -t dev-playwright:latest playwright-image
     print_success "Playwright image built successfully"
 else
     print_success "Playwright image already exists"
