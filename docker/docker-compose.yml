@@ -25,8 +25,7 @@ services:
       - ./docker/traefik:/etc/traefik
       - ./docker/traefik/acme.json:/etc/traefik/acme.json
       - ~/.aws:/root/.aws:ro
-    environment:
-      - AWS_REGION=eu-west-2
+
     networks:
       - devnet
     depends_on:
