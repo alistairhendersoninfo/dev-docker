@@ -2,8 +2,47 @@
 
 # Build Docker Images Script
 # Builds base images for the development environment
+#
+# Usage: ./Build-Docker-Images.sh [option]
+# Options:
+#   1 - Minimal base image (Ubuntu + basic tools)
+#   2 - Development base image (Ubuntu + dev tools)  
+#   3 - Playwright base image (browser automation)
+#   4 - Traefik base image (reverse proxy)
+#   5 - DNS base image (local DNS server)
+#   6 - All standard images
+#   7 - Exit
+#   --help - Show this help message
+#
+# Examples:
+#   ./Build-Docker-Images.sh 4    # Build Traefik image directly
+#   ./Build-Docker-Images.sh      # Show interactive menu
 
 set -e
+
+# Check for help parameter
+if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+    echo "🏗️  Build Docker Images"
+    echo "======================"
+    echo ""
+    echo "Usage: $0 [option]"
+    echo ""
+    echo "Options:"
+    echo "  1 - Minimal base image (Ubuntu + basic tools)"
+    echo "  2 - Development base image (Ubuntu + dev tools)"
+    echo "  3 - Playwright base image (browser automation)"
+    echo "  4 - Traefik base image (reverse proxy)"
+    echo "  5 - DNS base image (local DNS server)"
+    echo "  6 - All standard images"
+    echo "  7 - Exit"
+    echo "  --help, -h - Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0 4      # Build Traefik image directly"
+    echo "  $0        # Show interactive menu"
+    echo ""
+    exit 0
+fi
 
 echo "🏗️  Build Docker Images"
 echo "======================"
@@ -172,18 +211,24 @@ main() {
         exit 1
     fi
     
-    echo ""
-    echo "Which base images would you like to build?"
-    echo "1) Minimal base image (Ubuntu + basic tools)"
-    echo "2) Development base image (Ubuntu + dev tools)"
-    echo "3) Playwright base image (browser automation)"
-    echo "4) Traefik base image (reverse proxy)"
-    echo "5) DNS base image (local DNS server)"
-    echo "6) All standard images"
-    echo "7) Exit"
-    echo ""
-    
-    read -p "Enter your choice (1-7): " build_choice
+    # Check if command line parameter was provided
+    if [[ $# -gt 0 ]]; then
+        build_choice=$1
+        print_status "Using command line parameter: $build_choice"
+    else
+        echo ""
+        echo "Which base images would you like to build?"
+        echo "1) Minimal base image (Ubuntu + basic tools)"
+        echo "2) Development base image (Ubuntu + dev tools)"
+        echo "3) Playwright base image (browser automation)"
+        echo "4) Traefik base image (reverse proxy)"
+        echo "5) DNS base image (local DNS server)"
+        echo "6) All standard images"
+        echo "7) Exit"
+        echo ""
+        
+        read -p "Enter your choice (1-7): " build_choice
+    fi
     
     case $build_choice in
         1)
