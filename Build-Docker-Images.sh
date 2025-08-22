@@ -233,6 +233,14 @@ else
     print_success "Playwright image already exists"
 fi
 
+# Check if required images exist before starting services
+print_status "Checking required images..."
+if [[ "$(docker images -q dev-base:latest 2> /dev/null)" == "" ]]; then
+    print_warning "dev-base:latest image not found. Building it now..."
+    docker build -t dev-base:latest docker/base-image
+    print_success "Base image built successfully"
+fi
+
 # Start services
 print_status "Starting all services..."
 docker compose -f "$COMPOSE_FILE" up -d

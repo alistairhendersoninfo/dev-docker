@@ -85,27 +85,28 @@ services:
     depends_on:
       - base-image
 
-  playwright:
-    build:
-      context: ./playwright-image
-    image: dev-playwright:latest
-    container_name: playwright
-    hostname: playwright.docker
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.playwright.rule=Host(`playwright-local.alistairhenderson.info`)"
-      - "traefik.http.routers.playwright.entrypoints=websecure"
-      - "traefik.http.routers.playwright.tls=true"
-      - "traefik.http.routers.playwright.tls.certresolver=letsencrypt"
-    ports:
-      - "2223:22"
-    networks:
-      devnet:
-        ipv4_address: 172.20.0.12
-    dns:
-      - 172.20.0.2
-    depends_on:
-      - base-image
+  # Playwright service (commented out - uncomment when image is built)
+  # playwright:
+  #   build:
+  #     context: ./playwright-image
+  #   image: dev-playwright:latest
+  #   container_name: playwright
+  #   hostname: playwright.docker
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.playwright.rule=Host(`playwright-local.alistairhenderson.info`)"
+  #     - "traefik.http.routers.playwright.entrypoints=websecure"
+  #     - "traefik.http.routers.playwright.tls=true"
+  #     - "traefik.http.routers.playwright.tls.certresolver=letsencrypt"
+  #   ports:
+  #     - "2223:22"
+  #   networks:
+  #     devnet:
+  #       ipv4_address: 172.20.0.12
+  #   dns:
+  #     - 172.20.0.2
+  #   depends_on:
+  #     - base-image
 
 networks:
   devnet:
