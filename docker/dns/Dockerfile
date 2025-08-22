@@ -11,8 +11,8 @@ RUN apt-get update && apt-get install -y \
 # Copy configuration
 COPY dnsmasq.conf /etc/dnsmasq.conf
 
-# Create dnsmasq user
-RUN useradd -r -s /bin/false dnsmasq
+# Create dnsmasq user if it doesn't exist
+RUN id -u dnsmasq >/dev/null 2>&1 || useradd -r -s /bin/false dnsmasq
 
 # Expose DNS port
 EXPOSE 53/udp 53/tcp
