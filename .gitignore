@@ -213,14 +213,5 @@ TODO.md
 *.todo
 roadmap.md
 
-# Terminal connection guide (contains SSH details)
-docs/TERMINAL-CONNECTION-GUIDE.md
-
-# Claude AI instructions (internal workflow)
-docs/CLAUDE-INSTRUCTIONS.md
-
-# Test files (internal verification)
-docs/TEST.md
-
-# GitHub Project management (local reference)
-docs/GITHUB-PROJECT.md
+# Claude AI interaction files (internal workflow and project management)
+.claude/
