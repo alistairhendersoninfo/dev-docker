@@ -199,7 +199,7 @@ sudo apt install -y dnsmasq
 
 ### Configure dnsmasq
 
-Create the dnsmasq configuration file:
+Create the basic dnsmasq configuration file:
 
 ```bash
 sudo tee /etc/dnsmasq.conf > /dev/null << EOF
@@ -213,23 +213,16 @@ strict-order
 listen-address=0.0.0.0
 bind-interfaces
 
-# DNS entries for development containers
-# Replace YOUR_DOMAIN with your actual domain name
-address=/project1-local.YOUR_DOMAIN/192.168.69.23
-address=/project2-local.YOUR_DOMAIN/192.168.69.23
-address=/playwright-local.YOUR_DOMAIN/192.168.69.23
-address=/base-image-local.YOUR_DOMAIN/192.168.69.23
-
-# Internal Docker network resolution
-address=/.docker/127.0.0.11
-
 # Upstream DNS servers
 server=8.8.8.8
 server=8.8.4.4
+
+# Configuration file for additional DNS entries
+conf-dir=/etc/dnsmasq.d/,*.conf
 EOF
 ```
 
-**Note**: Replace `YOUR_DOMAIN` with your actual domain (e.g., `alistairhenderson.info`) and `192.168.69.23` with your server's IP address.
+**Note**: The Launch script will automatically add DNS entries to `/etc/dnsmasq.d/` when you configure your domain and start the containers.
 
 ### Handle systemd-resolved conflicts
 
@@ -276,11 +269,12 @@ sudo ufw allow 2221:2299/tcp
 ### Test DNS resolution
 
 ```bash
-# Test DNS from the host
-nslookup project1-local.YOUR_DOMAIN 127.0.0.1
+# Test basic DNS functionality
+nslookup google.com 127.0.0.1
 
-# Test from external client (replace with actual domain)
-nslookup project1-local.YOUR_DOMAIN YOUR_SERVER_IP
+# Container-specific DNS entries will be added when you run the Launch script
+# After launching containers, you can test with:
+# nslookup project1-local.YOUR_DOMAIN 127.0.0.1
 ```
 
 ### Client DNS Configuration

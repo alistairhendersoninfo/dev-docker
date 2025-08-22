@@ -2,6 +2,11 @@
 
 # Fix MD022 linting errors - ensure headings have blank lines above and below
 # Usage: ./fix-headings.sh filename.md
+# 
+# Features:
+# - Handles both ## and ### headings
+# - Only adds blank lines when needed (prevents double blank lines)
+# - Removes double blank lines if they exist
 
 if [[ $# -eq 0 ]]; then
     echo -n "Enter markdown filename: "
@@ -15,29 +20,51 @@ if [[ ! -f "$filename" ]]; then
     exit 1
 fi
 
-# Create temporary file
-temp_file=$(mktemp)
+echo "Processing headings in $filename..."
 
-# Process file line by line
-while IFS= read -r line; do
-    # If line starts with ### (heading)
-    if [[ "$line" =~ ^### ]]; then
-        # Add blank line above heading (if not already there)
-        if [[ -n "$prev_line" && "$prev_line" != "" ]]; then
-            echo "" >> "$temp_file"
+# Read file into array
+mapfile -t lines < "$filename"
+
+# Process the file
+{
+    for i in "${!lines[@]}"; do
+        line="${lines[$i]}"
+        
+        # Check if current line is a heading
+        if [[ "$line" =~ ^##+ ]]; then
+            # Check previous line for blank line before heading
+            if [[ $i -gt 0 ]]; then
+                prev_line="${lines[$((i-1))]}"
+                if [[ -n "$prev_line" ]]; then
+                    echo ""  # Add blank line before heading
+                fi
+            fi
+            
+            # Output the heading
+            echo "$line"
+            
+            # Check next line for blank line after heading
+            if [[ $i -lt $((${#lines[@]}-1)) ]]; then
+                next_line="${lines[$((i+1))]}"
+                if [[ -n "$next_line" ]]; then
+                    echo ""  # Add blank line after heading
+                fi
+            fi
+        else
+            # For non-heading lines, output them normally
+            echo "$line"
         fi
-        # Add heading
-        echo "$line" >> "$temp_file"
-        # Add blank line below heading
-        echo "" >> "$temp_file"
-    else
-        # Regular line - just add it
-        echo "$line" >> "$temp_file"
-    fi
-    prev_line="$line"
-done < "$filename"
+    done
+} > "$filename.tmp"
 
-# Replace original file
-mv "$temp_file" "$filename"
+# Remove consecutive blank lines
+awk '!NF {if (++n <= 1) print; next}; {n=0;print}' "$filename.tmp" > "$filename"
 
-echo "Fixed headings in $filename"
+# Clean up
+rm -f "$filename.tmp"
+
+
+
+echo "✅ Fixed headings in $filename"
+echo "   - Ensured blank lines above and below ## and ### headings"
+echo "   - Removed double blank lines"
