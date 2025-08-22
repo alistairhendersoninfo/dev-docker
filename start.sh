@@ -34,17 +34,17 @@ print_error() {
 
 # Check if we're in the right directory
 COMPOSE_FILE=""
-if [[ -f "docker-compose.yml" ]]; then
-    COMPOSE_FILE="docker-compose.yml"
+if [[ -f "docker/docker-compose.yml" ]]; then
+    COMPOSE_FILE="docker/docker-compose.yml"
 else
-    print_error "Please run this script from the docker directory"
-    print_error "Expected to find: docker-compose.yml"
+    print_error "Please run this script from the project root directory"
+    print_error "Expected to find: docker/docker-compose.yml"
     print_error ""
     print_error "Current directory: $(pwd)"
     print_error "Files in current directory:"
     ls -la | head -10
     print_error ""
-    print_error "Please run this script from the docker directory where docker-compose.yml is located"
+    print_error "Please run this script from the project root directory where docker/docker-compose.yml is located"
     exit 1
 fi
 
